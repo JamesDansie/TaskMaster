@@ -81,26 +81,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             MainActivity.this.startActivity(goToSettings);
         });
 
-        Button task1Button = findViewById(R.id.task1button);
-        task1Button.setOnClickListener((event -> {
-            Intent goToDetail = new Intent(MainActivity.this, Detail.class);
-            goToDetail.putExtra("taskName", task1Button.getText());
-            MainActivity.this.startActivity(goToDetail);
-        }));
-
-        Button task2Button = findViewById(R.id.task2button);
-        task2Button.setOnClickListener((event -> {
-            Intent goToDetail = new Intent(MainActivity.this, Detail.class);
-            goToDetail.putExtra("taskName", task2Button.getText());
-            MainActivity.this.startActivity(goToDetail);
-        }));
-
-        Button task3Button = findViewById(R.id.task3button);
-        task3Button.setOnClickListener((event -> {
-            Intent goToDetail = new Intent(MainActivity.this, Detail.class);
-            goToDetail.putExtra("taskName", task3Button.getText());
-            MainActivity.this.startActivity(goToDetail);
-        }));
     }
 
     @Override
@@ -108,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         Intent goToDetailIntent = new Intent(this, Detail.class);
 
         goToDetailIntent.putExtra("taskTitle", task.getTitle());
-        goToDetailIntent.putExtra("taskBody", task.getDescription());
+        goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }

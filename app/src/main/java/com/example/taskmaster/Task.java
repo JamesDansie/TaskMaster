@@ -4,9 +4,20 @@ public class Task {
     private String title;
     private String description;
 
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    private String state;
+
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
+        this.state = "new";
     }
 
     public String getTitle() {
