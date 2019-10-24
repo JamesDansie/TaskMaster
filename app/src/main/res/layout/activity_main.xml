@@ -15,11 +15,12 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2" />
+        app:layout_constraintVertical_bias="0.083" />
 
     <Button
         android:id="@+id/ButtonTaskAdd"
@@ -49,15 +50,16 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.433"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.433" />
+        app:layout_constraintVertical_bias="0.243" />
 
     <Button
         android:id="@+id/task1button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="212dp"
         android:text="task1"
         app:layout_constraintStart_toStartOf="@+id/ButtonTaskAdd"
         app:layout_constraintTop_toBottomOf="@+id/textView8" />
@@ -87,5 +89,15 @@
         android:text="Settings"
         app:layout_constraintEnd_toEndOf="@+id/ButtonTasksAll"
         app:layout_constraintTop_toTopOf="@+id/task1button" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="342dp"
+        android:layout_height="164dp"
+        android:layout_marginTop="36dp"
+        android:id="@+id/my_recycler_view"
+        android:scrollbars="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
