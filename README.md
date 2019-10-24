@@ -24,3 +24,6 @@ Built out the home page, add task, and all tasks
 
 2019/10/23
 Built out the detail view, and settings page. Added shared preferences to find the user name.
+
+2019/10/24
+Added Recycle view and event listener to the homepage.

@@ -13,11 +13,11 @@
         android:layout_marginTop="150dp"
         android:text="Task Title"
         android:textAppearance="@style/TextAppearance.AppCompat.Display2"
-        app:layout_constraintStart_toStartOf="@+id/textView6"
+        app:layout_constraintStart_toStartOf="@+id/taskDescriptionDetailText"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView6"
+        android:id="@+id/taskDescriptionDetailText"
         android:layout_width="285dp"
         android:layout_height="346dp"
         android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sem sapien, luctus sed tincidunt id, ornare vitae ipsum. Aenean ultrices nulla nec nulla feugiat, ut egestas sem maximus. Curabitur rhoncus neque tortor, nec scelerisque justo semper eu. Interdum et malesuada fames ac ante ipsum primis in faucibus. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Vestibulum et dolor lectus. In hac habitasse platea dictumst. Mauris bibendum felis quis ipsum interdum rhoncus. Nunc auctor nisl feugiat venenatis malesuada. Nullam varius dolor et leo gravida, facilisis ornare justo porttitor. Curabitur dignissim nisl pretium orci volutpat finibus. Phasellus at augue fringilla, placerat enim sit amet, egestas dui."
