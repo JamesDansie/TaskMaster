@@ -26,9 +26,8 @@
         android:id="@+id/ButtonTaskAdd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="88dp"
         android:text="Add Task"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/ButtonTasksAll"
         app:layout_constraintEnd_toStartOf="@+id/ButtonTasksAll"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -36,16 +35,18 @@
         android:id="@+id/ButtonTasksAll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
+        android:layout_marginTop="32dp"
         android:text="All Tasks"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/buttonSettings"
         app:layout_constraintStart_toEndOf="@+id/ButtonTaskAdd"
-        app:layout_constraintTop_toTopOf="@+id/ButtonTaskAdd" />
+        app:layout_constraintTop_toBottomOf="@+id/my_recycler_view" />
 
     <TextView
         android:id="@+id/textView8"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
         android:text="Username's Tasks"
         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -59,20 +60,25 @@
         android:id="@+id/buttonSettings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="32dp"
         android:text="Settings"
-        app:layout_constraintBottom_toTopOf="@+id/ButtonTasksAll"
-        app:layout_constraintEnd_toEndOf="@+id/ButtonTasksAll" />
+        app:layout_constraintBottom_toBottomOf="@+id/ButtonTasksAll"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/ButtonTasksAll" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/my_recycler_view"
         android:layout_width="342dp"
         android:layout_height="164dp"
         android:layout_marginTop="36dp"
-        android:id="@+id/my_recycler_view"
         android:scrollbars="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="left" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

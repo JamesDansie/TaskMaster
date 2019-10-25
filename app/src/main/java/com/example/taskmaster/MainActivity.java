@@ -64,28 +64,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks").allowMainThreadQueries().build();
-//
-//        this.tasks = new LinkedList<>();
-//        this.tasks.addAll(db.taskDao().getAll());
-//
-//        // ************ Recycle section *****************
-//
-//        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-//
-//        // use this setting to improve performance if you know that changes
-//        // in content do not change the layout size of the RecyclerView
-//        recyclerView.setHasFixedSize(true);
-//
-//        // use a linear layout manager
-//        layoutManager = new LinearLayoutManager(this);
-//        recyclerView.setLayoutManager(layoutManager);
-//
-//        // specify an adapter (see also next example)
-//        mAdapter = new TaskAdapter(this.tasks, this);
-//        recyclerView.setAdapter(mAdapter);
-
-
         //****************** Buttons ****************
 
         Button addTaskButton = findViewById(R.id.ButtonTaskAdd);

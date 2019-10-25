@@ -14,6 +14,9 @@ public interface TaskDao {
     @Query("SELECT * FROM task")
     List<Task> getAll();
 
+    @Query("DELETE FROM task WHERE title =:title")
+    abstract void deleteByTitle(String title);
+
     @Insert
     void addTask(Task task);
 
@@ -22,4 +25,5 @@ public interface TaskDao {
 
     @Delete
     void deleteTask(Task task);
+
 }
