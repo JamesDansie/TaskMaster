@@ -37,7 +37,9 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         userTasks.setText(username +"'s tasks are;");
 
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks").allowMainThreadQueries().build();
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks")
+                .fallbackToDestructiveMigration()
+                .allowMainThreadQueries().build();
 
         this.tasks = new LinkedList<>();
         this.tasks.addAll(db.taskDao().getAll());
