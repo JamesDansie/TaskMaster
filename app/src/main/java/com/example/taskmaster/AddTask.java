@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 public class AddTask extends AppCompatActivity {
     public AppDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
