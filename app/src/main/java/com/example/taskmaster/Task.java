@@ -1,23 +1,34 @@
 package com.example.taskmaster;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
+
+@Entity
 public class Task {
+
+    @PrimaryKey(autoGenerate = true)
+    private long id;
+
     private String title;
     private String description;
 
-    public String getState() {
-        return state;
+    @TypeConverters(StatusConverter.class)
+    private Status status;
+
+    public Status getStatus() {
+        return status;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setStatus(Status status) {
+        this.status = status;
     }
-
-    private String state;
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
-        this.state = "new";
+        this.status = Status.NEW;
+
     }
 
     public String getTitle() {
@@ -42,5 +53,13 @@ public class Task {
                 "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 '}';
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

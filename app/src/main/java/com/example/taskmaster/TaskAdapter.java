@@ -1,5 +1,5 @@
 package com.example.taskmaster;
-
+//From Michelle's sample code
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;

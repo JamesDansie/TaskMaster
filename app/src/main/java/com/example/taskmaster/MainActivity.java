@@ -3,6 +3,7 @@ package com.example.taskmaster;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,6 +22,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    public AppDatabase db;
+
     @Override
     protected void onResume(){
         super.onResume();
@@ -32,17 +35,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         }
         TextView userTasks = findViewById(R.id.textView8);
         userTasks.setText(username +"'s tasks are;");
-    }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+
+        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks")
+                .fallbackToDestructiveMigration()
+                .allowMainThreadQueries().build();
 
         this.tasks = new LinkedList<>();
-        this.tasks.add(new Task("Feed Cat", "he is a grumpy fatty, but very adorable"));
-        this.tasks.add(new Task("Try more sorts", "contemplate life choices"));
-        this.tasks.add(new Task("Code", "go pound code"));
+        this.tasks.addAll(db.taskDao().getAll());
 
         // ************ Recycle section *****************
 
@@ -59,7 +59,12 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         // specify an adapter (see also next example)
         mAdapter = new TaskAdapter(this.tasks, this);
         recyclerView.setAdapter(mAdapter);
+    }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         //****************** Buttons ****************
 
