@@ -25,6 +25,14 @@ public class InternetTask {
         this.assignedUser = assignedUser;
     }
 
+    public InternetTask(Task task){
+        this.id = task.getId();
+        this.title = task.getTitle();
+        this.body = task.getDescription();
+        this.assignedUser = task.getAssignedUser();
+        this.state = "new";
+    }
+
     public long getId() {
         return id;
     }

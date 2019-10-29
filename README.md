@@ -27,3 +27,6 @@ Built out the detail view, and settings page. Added shared preferences to find t
 
 2019/10/24
 Added Recycle view and event listener to the homepage.
+
+2019/10/29
+Added a web server.
