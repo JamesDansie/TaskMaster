@@ -12,6 +12,7 @@ public class Task {
 
     private String title;
     private String description;
+    private String assignedUser;
 
     @TypeConverters(StatusConverter.class)
     private Status status;
@@ -28,7 +29,14 @@ public class Task {
         this.title = title;
         this.description = description;
         this.status = Status.NEW;
+        this.assignedUser = null;
+    }
 
+    public Task(InternetTask internetTask){
+        this.title = internetTask.getTitle();
+        this.description = internetTask.getBody();
+        this.status = Status.NEW;
+        this.assignedUser = internetTask.getAssignedUser();
     }
 
     public String getTitle() {
@@ -61,5 +69,13 @@ public class Task {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public String getAssignedUser() {
+        return assignedUser;
+    }
+
+    public void setAssignedUser(String assignedUser) {
+        this.assignedUser = assignedUser;
     }
 }
