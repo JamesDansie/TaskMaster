@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskInteractionListener{
+    //TODO: I would like to replace ll with a hashtable, but it breaks... everything :(
     private List<Task> tasks;
 
     private RecyclerView recyclerView;
@@ -125,12 +127,28 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     }
 
     public void putDataOnPage(String data){
-        TextView textView = findViewById(R.id.textView);
-        textView.setText(data);
+//        TextView textView = findViewById(R.id.textView);
+//        textView.setText(data);
 
+        //Turning JSON into InternetTasks
         Gson gson = new Gson();
         InternetTask[] incomingArr = gson.fromJson(data, InternetTask[].class);
-        System.out.println(Arrays.toString(incomingArr));
+
+        //Getting a set of existing titles
+        HashSet<String> titles = new HashSet<>();
+        for(Task task : this.tasks){
+            titles.add(task.getTitle());
+        }
+
+        for(InternetTask internetTask: incomingArr){
+            //if the title is a new title then add it
+            if(!titles.contains(internetTask.getTitle())){
+                titles.add(internetTask.getTitle());
+                Task newTask = new Task(internetTask);
+                tasks.add(newTask);
+                db.taskDao().addTask(newTask);
+            }
+        }
     }
 }
 

@@ -5,6 +5,16 @@ public class InternetTask {
     public String title;
     public String body;
     public String assignedUser;
+    public String state;
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
 
     public InternetTask(){};
 
@@ -54,6 +64,7 @@ public class InternetTask {
                 ", title='" + title + '\'' +
                 ", body='" + body + '\'' +
                 ", assignedUser='" + assignedUser + '\'' +
+                ", state='" + state + '\'' +
                 '}';
     }
 }
