@@ -17,10 +17,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -84,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url("https://taskmaster-api.herokuapp.com/tasks")
+                .url(getString(R.string.backend_url) + "/tasks") // backend_url + "/tasks";
                 .build();
 
         client.newCall(request).enqueue(new LogTasksCallback(this));
@@ -126,7 +129,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         textView.setText(data);
 
         Gson gson = new Gson();
-        GsonArr incomingArr = gson.fromJson(data, InternetTask.class);
+        InternetTask[] incomingArr = gson.fromJson(data, InternetTask[].class);
+        System.out.println(Arrays.toString(incomingArr));
     }
 }
 
