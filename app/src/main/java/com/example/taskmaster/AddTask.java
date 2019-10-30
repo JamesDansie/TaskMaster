@@ -3,8 +3,10 @@ package com.example.taskmaster;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -54,52 +56,48 @@ public class AddTask extends AppCompatActivity {
             TextView descView = findViewById(R.id.AddTaskDescription);
             String taskDesc = descView.getText().toString();
 
+            //Setting up new task
             Task newTask = new Task(taskTitle, taskDesc);
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+            String username = prefs.getString("username", "Interchangable Cog");
+            newTask.setAssignedUser(username);
 
+            //Making a set of titles
             List<Task> tasks = db.taskDao().getAll();
             HashSet<String> titles = new HashSet<>();
-
             for(Task task : tasks){
                 titles.add(task.getTitle());
             }
 
+            //If the task title is unique, then add it to all the things
             if(!titles.contains(newTask.getTitle())){
                 db.taskDao().addTask(newTask);
-                InternetTask internetTask = new InternetTask(newTask);
-
-                Gson gson = new Gson();
-                String json = gson.toJson(internetTask);
-
-                final MediaType JSON
-                        = MediaType.get("application/json; charset=utf-8");
 
                 OkHttpClient client = new OkHttpClient();
-                    Log.i("PostUrl",getString(R.string.backend_url) + "/tasks");
+                String PostUrl = getString(R.string.backend_url) + "/tasks";
+                Log.i("PostUrl",PostUrl);
 
-                    RequestBody body = new MultipartBody.Builder()
-                            .setType(MultipartBody.FORM)
-                            .addFormDataPart("title", newTask.getTitle())
-                            .addFormDataPart("body", newTask.getDescription())
-                            .build();
-                    Request request = new Request.Builder()
-                            .url(getString(R.string.backend_url) + "/tasks")
-                            .post(body)
-                            .build();
-                    client.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                            Log.e("PostPain",e.getMessage());
-                        }
+                RequestBody body = new MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("title", newTask.getTitle())
+                        .addFormDataPart("body", newTask.getDescription())
+                        .build();
+                Request request = new Request.Builder()
+                        .url(PostUrl)
+                        .post(body)
+                        .build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                        Log.e("PostPain",e.getMessage());
+                    }
 
-                        @Override
-                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                    @Override
+                    public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
 
-                        }
-                    });
-
+                    }
+                });
             }
-
-
         });
     }
 }

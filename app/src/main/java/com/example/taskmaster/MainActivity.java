@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private List<Task> tasks;
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private TaskAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
 
     public AppDatabase db;
@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         // specify an adapter (see also next example)
         mAdapter = new TaskAdapter(this.tasks, this);
         recyclerView.setAdapter(mAdapter);
+
     }
 
     @Override
@@ -149,6 +150,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 db.taskDao().addTask(newTask);
             }
         }
+        mAdapter.notifyDataSetChanged();
+
     }
 }
 
