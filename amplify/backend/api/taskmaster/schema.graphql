@@ -1,0 +1,7 @@
+type Task @model {
+  id: ID!
+  name: String!
+  description: String!
+  assignedUser: String
+  status: String
+}

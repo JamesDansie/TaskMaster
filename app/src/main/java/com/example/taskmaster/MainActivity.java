@@ -16,6 +16,12 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
+import com.amazonaws.mobile.config.AWSConfiguration;
+import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
+import com.apollographql.apollo.GraphQLCall;
+import com.apollographql.apollo.exception.ApolloException;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -28,6 +34,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.annotation.Nonnull;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -39,14 +47,17 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private List<Task> tasks;
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private TaskAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private AWSAppSyncClient awsAppSyncClient;
 
     public AppDatabase db;
 
     @Override
     protected void onResume(){
         super.onResume();
+
+        this.tasks = new LinkedList<>();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String username = prefs.getString("username", "Interchangable Cog");
@@ -56,13 +67,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         TextView userTasks = findViewById(R.id.textView8);
         userTasks.setText(username +"'s tasks are;");
 
+        queryAllTasks();
 
-        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks")
-                .fallbackToDestructiveMigration()
-                .allowMainThreadQueries().build();
-
-        this.tasks = new LinkedList<>();
-        this.tasks.addAll(db.taskDao().getAll());
+        //******************** Local DB *******************
+//        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks")
+//                .fallbackToDestructiveMigration()
+//                .allowMainThreadQueries().build();
+//
+//        this.tasks.addAll(db.taskDao().getAll());
 
         // ************ Recycle section *****************
 
@@ -79,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         // specify an adapter (see also next example)
         mAdapter = new TaskAdapter(this.tasks, this);
         recyclerView.setAdapter(mAdapter);
+
     }
 
     @Override
@@ -86,13 +99,23 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        OkHttpClient client = new OkHttpClient();
+        //***************** OkHttp To Heroku ***************
+//        OkHttpClient client = new OkHttpClient();
+//
+//        Request request = new Request.Builder()
+//                .url(getString(R.string.backend_url) + "/tasks") // backend_url + "/tasks";
+//                .build();
+//
+//        client.newCall(request).enqueue(new LogTasksCallback(this));
 
-        Request request = new Request.Builder()
-                .url(getString(R.string.backend_url) + "/tasks") // backend_url + "/tasks";
+        //****************** AWS Amplify *************
+
+        awsAppSyncClient = AWSAppSyncClient.builder()
+                .context(getApplicationContext())
+                .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
-        client.newCall(request).enqueue(new LogTasksCallback(this));
+        queryAllTasks();
 
         //****************** Buttons ****************
 
@@ -116,12 +139,49 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     }
 
+    //Get all the things
+    public void queryAllTasks() {
+        awsAppSyncClient.query(ListTasksQuery.builder().build())
+                .responseFetcher(AppSyncResponseFetchers.CACHE_AND_NETWORK)
+                .enqueue(getAllTasksCallback);
+    }
+    public GraphQLCall.Callback<ListTasksQuery.Data> getAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
+        final String TAG = "getAllTasksCallback";
+
+        @Override
+        public void onResponse(@Nonnull com.apollographql.apollo.api.Response<ListTasksQuery.Data> response) {
+            Log.i(TAG,response.data().listTasks().items().toString());
+
+            Handler handlerForMainThread = new Handler(Looper.getMainLooper().getMainLooper()){
+                @Override
+                public void handleMessage(Message inputMessage){
+                    List<ListTasksQuery.Item> items = response.data().listTasks().items();
+                    tasks.clear();
+                    for(ListTasksQuery.Item item : items){
+                        tasks.add(new Task(item));
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            };
+            handlerForMainThread.obtainMessage().sendToTarget();
+        }
+
+        @Override
+        public void onFailure(@Nonnull ApolloException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    };
+
     @Override
     public void potato(Task task) {
         Intent goToDetailIntent = new Intent(this, Detail.class);
 
         goToDetailIntent.putExtra("taskTitle", task.getTitle());
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
+
+        Log.e("sanitY","not found");
+        Log.i("IdBeingPassed", Long.toString(task.getId()));
+        goToDetailIntent.putExtra("taskId", task.getId());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }
@@ -149,6 +209,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 db.taskDao().addTask(newTask);
             }
         }
+        mAdapter.notifyDataSetChanged();
+
     }
 }
 
