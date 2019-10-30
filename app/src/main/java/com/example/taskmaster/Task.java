@@ -4,6 +4,8 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
+
 @Entity
 public class Task {
 
@@ -15,28 +17,27 @@ public class Task {
     private String assignedUser;
 
     @TypeConverters(StatusConverter.class)
-    private Status status;
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
+    private String status;
 
     public Task(String title, String description) {
         this.title = title;
         this.description = description;
-        this.status = Status.NEW;
+        this.status = "new";
         this.assignedUser = null;
     }
 
     public Task(InternetTask internetTask){
         this.title = internetTask.getTitle();
         this.description = internetTask.getBody();
-        this.status = Status.NEW;
+        this.status = "new";
         this.assignedUser = internetTask.getAssignedUser();
+    }
+
+    public Task(ListTasksQuery.Item item){
+        this.title = item.name();
+        this.description = item.description();
+        this.status = item.status();
+        this.assignedUser = item.assignedUser();
     }
 
     public String getTitle() {
@@ -77,5 +78,13 @@ public class Task {
 
     public void setAssignedUser(String assignedUser) {
         this.assignedUser = assignedUser;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
