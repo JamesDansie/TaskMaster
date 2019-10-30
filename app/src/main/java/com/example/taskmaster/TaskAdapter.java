@@ -1,5 +1,6 @@
 package com.example.taskmaster;
 //From Michelle's sample code
+import android.util.Log;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +43,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Log.i("PotatoListner","I was clicked");
                 listener.potato(holder.task);
             }
         });
