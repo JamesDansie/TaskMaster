@@ -12,6 +12,15 @@ public class Task {
     @PrimaryKey(autoGenerate = true)
     private long id;
 
+    public String getIdDyno() {
+        return idDyno;
+    }
+
+    public void setIdDyno(String idDyno) {
+        this.idDyno = idDyno;
+    }
+
+    private String idDyno;
     private String title;
     private String description;
     private String assignedUser;
@@ -38,6 +47,7 @@ public class Task {
         this.description = item.description();
         this.status = item.status();
         this.assignedUser = item.assignedUser();
+        this.idDyno = item.id();
     }
 
     public String getTitle() {
@@ -56,13 +66,7 @@ public class Task {
         this.description = description;
     }
 
-    @Override
-    public String toString() {
-        return "Task{" +
-                "title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                '}';
-    }
+
 
     public long getId() {
         return id;
@@ -86,5 +90,17 @@ public class Task {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", idDyno='" + idDyno + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", assignedUser='" + assignedUser + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

@@ -4,4 +4,10 @@ type Task @model {
   description: String!
   assignedUser: String
   status: String
+  team: Team @connection(name:"TeamTasks")
+}
+type Team @model {
+  id: ID!
+  name: String!
+  tasks: [Task] @connection(name:"TeamTasks")
 }

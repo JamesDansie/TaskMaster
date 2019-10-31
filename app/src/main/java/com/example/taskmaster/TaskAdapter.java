@@ -44,6 +44,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             @Override
             public void onClick(View view) {
                 Log.i("PotatoListner","I was clicked");
+                Log.i("taskPassedToListner", holder.task.toString());
                 listener.potato(holder.task);
             }
         });

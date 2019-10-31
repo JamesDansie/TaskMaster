@@ -3,6 +3,7 @@ package com.example.taskmaster;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,12 +12,18 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.amplify.generated.graphql.CreateTaskMutation;
+import com.amazonaws.amplify.generated.graphql.ListTeamsQuery;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
@@ -42,6 +49,29 @@ import type.CreateTaskInput;
 public class AddTask extends AppCompatActivity {
     public AppDatabase db;
     AWSAppSyncClient awsAppSyncClient;
+    public String team;
+
+    public void onRadioButtonClicked(View view){
+        boolean checked  = ((RadioButton) view).isChecked();
+
+        switch (view.getId()) {
+            case R.id.radioButtonBlueTeam:
+                if (checked){
+                    team = "blue";
+                }
+                break;
+            case R.id.radioButtonRedTeam:
+                if(checked){
+                    team = "red";
+                }
+                break;
+            case R.id.radioButtonGreenTeam:
+                if(checked)
+                    team = "green";
+                break;
+        }
+        Log.i("TeamIs",team);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,16 +87,14 @@ public class AddTask extends AppCompatActivity {
 
         Button submitTask = findViewById(R.id.AddTask);
         submitTask.setOnClickListener((event) -> {
-            findViewById(R.id.submitText).setVisibility(View.VISIBLE);
 
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                public void run(){
-                    findViewById(R.id.submitText).setVisibility(View.INVISIBLE);
-                }
-            }, 1000);
+            Context context = getApplicationContext();
+            CharSequence text = "Submitted!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
 
-            db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks").allowMainThreadQueries().build();
+//            db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks").allowMainThreadQueries().build();
 
             TextView titleView = findViewById(R.id.AddTaskTitle);
             String taskTitle = titleView.getText().toString();
@@ -125,33 +153,74 @@ public class AddTask extends AppCompatActivity {
 
     //******************** GraphQL stuff ******************
     public void runAddTaskMutation(Task newTask){
-        CreateTaskInput createTaskInput = CreateTaskInput.builder()
-                .name(newTask.getTitle())
-                .description(newTask.getDescription())
-                .status(newTask.getStatus())
-                .build();
-        awsAppSyncClient.mutate(CreateTaskMutation.builder().input(createTaskInput).build())
-                .enqueue(addTaskCallback);
-    };
-    public GraphQLCall.Callback<CreateTaskMutation.Data> addTaskCallback = new GraphQLCall.Callback<CreateTaskMutation.Data>() {
-        final String TAG = "addTaskCallback";
+        GraphQLCall.Callback<ListTeamsQuery.Data> addTeamCallback = new GraphQLCall.Callback<ListTeamsQuery.Data>() {
+            @Override
+            public void onResponse(@Nonnull Response<ListTeamsQuery.Data> response) {
+                CreateTaskInput input = CreateTaskInput.builder()
+                        .name(newTask.getTitle())
+                        .description(newTask.getDescription())
+                        .status(newTask.getStatus())
+                        .assignedUser(newTask.getAssignedUser())
+                        .taskTeamId(team)
+                        .build();
+                CreateTaskMutation mutation = CreateTaskMutation.builder().input(input).build();
+                awsAppSyncClient.mutate(mutation).enqueue(new GraphQLCall.Callback<CreateTaskMutation.Data>() {
+                    @Override
+                    public void onResponse(@Nonnull Response<CreateTaskMutation.Data> response) {
+                        Log.i("Mutation","Success");
+                    }
 
-        @Override
-        public void onResponse(@Nonnull Response<CreateTaskMutation.Data> response) {
-            Log.i(TAG, "added a task");
+                    @Override
+                    public void onFailure(@Nonnull ApolloException e) {
+                        Log.e("MutationFail",e.getMessage());
+                    }
+                });
+            }
 
-//            Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
-//                @Override
-//                public void handleMessage(Message inputMessage){
-//                    CreateTaskMutation.CreateTask task = response.data().createTask();
-//                    db.taskDao().addTask(new Task);
-//                }
-//            };
-        }
+            @Override
+            public void onFailure(@Nonnull ApolloException e) {
+                Log.e("AddTaskFail",e.getMessage());
+            }
+        };
 
-        @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
-        }
-    };
+        //Must be network_only otherwise makes duplicates
+        awsAppSyncClient.query(ListTeamsQuery.builder().build())
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
+                .enqueue(addTeamCallback);
+    }
+
+
+
+//    public void runAddTaskMutation(Task newTask){
+//        CreateTaskInput createTaskInput = CreateTaskInput.builder()
+//                .name(newTask.getTitle())
+//                .description(newTask.getDescription())
+//                .status(newTask.getStatus())
+//                .assignedUser(newTask.getAssignedUser())
+//                .build();
+//        awsAppSyncClient.mutate(CreateTaskMutation.builder().input(createTaskInput).build())
+//                .enqueue(addTaskCallback);
+//    };
+//    public GraphQLCall.Callback<CreateTaskMutation.Data> addTaskCallback = new GraphQLCall.Callback<CreateTaskMutation.Data>() {
+//        final String TAG = "addTaskCallback";
+//
+//        @Override
+//        public void onResponse(@Nonnull Response<CreateTaskMutation.Data> response) {
+//            Log.i(TAG, "added a task");
+//
+////            Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
+////                @Override
+////                public void handleMessage(Message inputMessage){
+////                    CreateTaskMutation.CreateTask task = response.data().createTask();
+////                    db.taskDao().addTask(new Task);
+////                }
+////            };
+//        }
+//
+//        @Override
+//        public void onFailure(@Nonnull ApolloException e) {
+//            Log.e(TAG, e.getMessage());
+//        }
+//    };
 }
+

@@ -30,3 +30,9 @@ Added Recycle view and event listener to the homepage.
 
 2019/10/29
 Added a web server.
+
+2019/10/30
+Added dynamoDB to store tasks in the cloud.
+
+2019/10/31
+Added teams to dynamoDB. Front page filters based off of the team in settings.
