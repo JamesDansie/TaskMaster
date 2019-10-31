@@ -3,6 +3,7 @@ package com.example.taskmaster;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,9 +12,12 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.amazonaws.amplify.generated.graphql.CreateTaskMutation;
 import com.amazonaws.amplify.generated.graphql.ListTeamsQuery;
@@ -83,14 +87,12 @@ public class AddTask extends AppCompatActivity {
 
         Button submitTask = findViewById(R.id.AddTask);
         submitTask.setOnClickListener((event) -> {
-            findViewById(R.id.submitText).setVisibility(View.VISIBLE);
 
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                public void run(){
-                    findViewById(R.id.submitText).setVisibility(View.INVISIBLE);
-                }
-            }, 1000);
+            Context context = getApplicationContext();
+            CharSequence text = "Submitted!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
 
 //            db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks").allowMainThreadQueries().build();
 
@@ -181,8 +183,9 @@ public class AddTask extends AppCompatActivity {
             }
         };
 
+        //Must be network_only otherwise makes duplicates
         awsAppSyncClient.query(ListTeamsQuery.builder().build())
-                .responseFetcher(AppSyncResponseFetchers.CACHE_AND_NETWORK)
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
                 .enqueue(addTeamCallback);
     }
 
@@ -220,3 +223,4 @@ public class AddTask extends AppCompatActivity {
 //        }
 //    };
 }
+

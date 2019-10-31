@@ -29,62 +29,41 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintVertical_bias="0.751" />
+        app:layout_constraintVertical_bias="0.35000002" />
 
     <EditText
         android:id="@+id/AddTaskDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="50dp"
         android:ems="10"
         android:hint="Task Description"
         android:inputType="textPersonName"
-        app:layout_constraintBottom_toTopOf="@+id/AddTask"
+        app:layout_constraintBottom_toTopOf="@+id/radioGroup"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/AddTaskTitle" />
 
     <Button
         android:id="@+id/AddTask"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="264dp"
         android:text="Add Task"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toBottomOf="@+id/radioGroup"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.274"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:text="Total Tasks: 0"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/AddTask"
-        app:layout_constraintVertical_bias="0.514" />
-
-    <TextView
-        android:id="@+id/submitText"
-        android:layout_width="129dp"
-        android:layout_height="33dp"
-        android:layout_marginStart="36dp"
-        android:text="Submitted!"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/AddTask"
-        app:layout_constraintStart_toEndOf="@+id/AddTask"
-        app:layout_constraintTop_toTopOf="@+id/AddTask" />
+        app:layout_constraintTop_toTopOf="@+id/radioGroup" />
 
     <RadioGroup
+        android:id="@+id/radioGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/AddTask">
+        app:layout_constraintTop_toBottomOf="@+id/AddTaskDescription"
+        app:layout_constraintVertical_bias="0.19">
 
 
         <RadioButton
