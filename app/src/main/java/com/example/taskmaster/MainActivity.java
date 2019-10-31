@@ -179,9 +179,10 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("taskTitle", task.getTitle());
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
+        System.out.println("************************");
         Log.e("sanitY","not found");
-        Log.i("IdBeingPassed", Long.toString(task.getId()));
-        goToDetailIntent.putExtra("taskId", task.getId());
+        Log.i("TaskToBePassed", task.toString());
+        goToDetailIntent.putExtra("taskId", task.getIdDyno());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }

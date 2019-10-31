@@ -8,8 +8,14 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.amazonaws.amplify.generated.graphql.DeleteTaskMutation;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.apollographql.apollo.GraphQLCall;
+import com.apollographql.apollo.api.Response;
+import com.apollographql.apollo.exception.ApolloException;
+
+import javax.annotation.Nonnull;
 
 import type.DeleteTaskInput;
 
@@ -54,9 +60,27 @@ public class Detail extends AppCompatActivity {
     //I am here to delete by ID, need to check id that was passed.
     public void runDeleteTaskMutation(String id){
         Log.i("IdToBeDelete", id);
+        DeleteTaskInput deleteTaskInput = DeleteTaskInput.builder()
+                .id(id)
+                .build();
+
+        awsAppSyncClient.mutate(DeleteTaskMutation.builder().input(deleteTaskInput).build())
+                .enqueue(new GraphQLCall.Callback<DeleteTaskMutation.Data>() {
+                    @Override
+                    public void onResponse(@Nonnull Response<DeleteTaskMutation.Data> response) {
+                        Log.i("Delete","yay!");
+                    }
+
+                    @Override
+                    public void onFailure(@Nonnull ApolloException e) {
+                        Log.i("Delete","sad :(");
+                    }
+                });
+
 //        DeleteTaskInput deleteTaskInput = DeleteTaskInput.builder()
 
     }
+
 
 //    public void runAddTaskMutation(Task newTask){
 //        CreateTaskInput createTaskInput = CreateTaskInput.builder()
