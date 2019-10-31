@@ -50,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private TaskAdapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private AWSAppSyncClient awsAppSyncClient;
+    private String username;
+    private String team;
 
     public AppDatabase db;
 
@@ -60,9 +62,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         this.tasks = new LinkedList<>();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String username = prefs.getString("username", "Interchangable Cog");
+        this.username = prefs.getString("username", "Interchangable Cog");
+        this.team = prefs.getString("team","any");
+
         if(username.length() == 0){
             username = "Interchangable Cog";
+        }
+        if(team == null){
+            team = "any";
         }
         TextView userTasks = findViewById(R.id.textView8);
         userTasks.setText(username +"'s tasks are;");
@@ -115,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
-        queryAllTasks();
 
         //****************** Buttons ****************
 
@@ -156,9 +162,29 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 @Override
                 public void handleMessage(Message inputMessage){
                     List<ListTasksQuery.Item> items = response.data().listTasks().items();
+
                     tasks.clear();
+                    //if statements sort based on team from settings page
+                    Log.i("TeamToBeAdded",team);
                     for(ListTasksQuery.Item item : items){
-                        tasks.add(new Task(item));
+                        Log.i("ItemTobeAdded",item.toString());
+
+                        if(team.equals("any")){
+                            tasks.add(new Task(item));
+                        } else if (team.equals("red")){
+                            if(item.team().id().equals("red")){
+                                tasks.add(new Task(item));
+                            }
+                        } else if (team.equals("blue")){
+                            if(item.team().id().equals("blue")){
+                                tasks.add(new Task(item));
+                            }
+                        }  else if (team.equals("green")){
+                            if(item.team().id().equals("green")) {
+                                tasks.add(new Task(item));
+                            }
+                        }
+
                     }
                     mAdapter.notifyDataSetChanged();
                 }
