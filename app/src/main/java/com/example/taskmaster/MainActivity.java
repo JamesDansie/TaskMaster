@@ -180,16 +180,13 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
         System.out.println("************************");
-        Log.e("sanitY","not found");
-        Log.i("TaskToBePassed", task.toString());
+        Log.i("TaskToBePassedInPotato", task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }
 
     public void putDataOnPage(String data){
-//        TextView textView = findViewById(R.id.textView);
-//        textView.setText(data);
 
         //Turning JSON into InternetTasks
         Gson gson = new Gson();
