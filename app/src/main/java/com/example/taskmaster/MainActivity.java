@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 .enqueue(getAllTasksCallback);
     }
     public GraphQLCall.Callback<ListTasksQuery.Data> getAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
-        final String TAG = "getAllTasksCallback";
+        final String TAG = "Main.getAllTasks";
 
         @Override
         public void onResponse(@Nonnull com.apollographql.apollo.api.Response<ListTasksQuery.Data> response) {
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
         System.out.println("************************");
-        Log.i("TaskToBePassedInPotato", task.toString());
+        Log.i("Main.TaskPassedInPotato", task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
 
         MainActivity.this.startActivity(goToDetailIntent);
@@ -245,7 +245,7 @@ class LogTasksCallback implements Callback {
         this.currentMainActivityInstance = currentMainActivityInstance;
     }
 
-    private static final String TAG = "Callback";
+    private static final String TAG = "Main.Callback";
 
     @Override
     public void onFailure(@NotNull Call call, @NotNull IOException e) {

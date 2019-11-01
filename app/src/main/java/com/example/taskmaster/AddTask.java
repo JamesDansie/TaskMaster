@@ -167,19 +167,19 @@ public class AddTask extends AppCompatActivity {
                 awsAppSyncClient.mutate(mutation).enqueue(new GraphQLCall.Callback<CreateTaskMutation.Data>() {
                     @Override
                     public void onResponse(@Nonnull Response<CreateTaskMutation.Data> response) {
-                        Log.i("Mutation","Success");
+                        Log.i("AddTask.Mutation","Success");
                     }
 
                     @Override
                     public void onFailure(@Nonnull ApolloException e) {
-                        Log.e("MutationFail",e.getMessage());
+                        Log.e("AddTask.MutationFail",e.getMessage());
                     }
                 });
             }
 
             @Override
             public void onFailure(@Nonnull ApolloException e) {
-                Log.e("AddTaskFail",e.getMessage());
+                Log.e("AddTask.AddTaskFail",e.getMessage());
             }
         };
 
@@ -188,39 +188,5 @@ public class AddTask extends AppCompatActivity {
                 .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
                 .enqueue(addTeamCallback);
     }
-
-
-
-//    public void runAddTaskMutation(Task newTask){
-//        CreateTaskInput createTaskInput = CreateTaskInput.builder()
-//                .name(newTask.getTitle())
-//                .description(newTask.getDescription())
-//                .status(newTask.getStatus())
-//                .assignedUser(newTask.getAssignedUser())
-//                .build();
-//        awsAppSyncClient.mutate(CreateTaskMutation.builder().input(createTaskInput).build())
-//                .enqueue(addTaskCallback);
-//    };
-//    public GraphQLCall.Callback<CreateTaskMutation.Data> addTaskCallback = new GraphQLCall.Callback<CreateTaskMutation.Data>() {
-//        final String TAG = "addTaskCallback";
-//
-//        @Override
-//        public void onResponse(@Nonnull Response<CreateTaskMutation.Data> response) {
-//            Log.i(TAG, "added a task");
-//
-////            Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
-////                @Override
-////                public void handleMessage(Message inputMessage){
-////                    CreateTaskMutation.CreateTask task = response.data().createTask();
-////                    db.taskDao().addTask(new Task);
-////                }
-////            };
-//        }
-//
-//        @Override
-//        public void onFailure(@Nonnull ApolloException e) {
-//            Log.e(TAG, e.getMessage());
-//        }
-//    };
 }
 
