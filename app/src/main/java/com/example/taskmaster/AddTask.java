@@ -13,9 +13,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -46,37 +50,19 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import type.CreateTaskInput;
 
-public class AddTask extends AppCompatActivity {
-    public AppDatabase db;
+public class AddTask extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
+    private AppDatabase db;
     AWSAppSyncClient awsAppSyncClient;
-    public String team;
-
-    public void onRadioButtonClicked(View view){
-        boolean checked  = ((RadioButton) view).isChecked();
-
-        switch (view.getId()) {
-            case R.id.radioButtonBlueTeam:
-                if (checked){
-                    team = "blue";
-                }
-                break;
-            case R.id.radioButtonRedTeam:
-                if(checked){
-                    team = "red";
-                }
-                break;
-            case R.id.radioButtonGreenTeam:
-                if(checked)
-                    team = "green";
-                break;
-        }
-        Log.i("TeamIs",team);
-    }
+    private LinkedList<ListTeamsQuery.Item> teams;
+    private String team;
+    private String teamID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
+
+        teams = new LinkedList<>();
 
         // Build a connection to AWS
         awsAppSyncClient = AWSAppSyncClient.builder()
@@ -84,6 +70,10 @@ public class AddTask extends AppCompatActivity {
                 .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
+        ListTeamsQuery query = ListTeamsQuery.builder().build();
+        awsAppSyncClient.query(query)
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
+                .enqueue(allTeamCallback);
 
         Button submitTask = findViewById(R.id.AddTask);
         submitTask.setOnClickListener((event) -> {
@@ -161,7 +151,7 @@ public class AddTask extends AppCompatActivity {
                         .description(newTask.getDescription())
                         .status(newTask.getStatus())
                         .assignedUser(newTask.getAssignedUser())
-                        .taskTeamId(team)
+                        .taskTeamId(teamID)
                         .build();
                 CreateTaskMutation mutation = CreateTaskMutation.builder().input(input).build();
                 awsAppSyncClient.mutate(mutation).enqueue(new GraphQLCall.Callback<CreateTaskMutation.Data>() {
@@ -187,6 +177,60 @@ public class AddTask extends AppCompatActivity {
         awsAppSyncClient.query(ListTeamsQuery.builder().build())
                 .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
                 .enqueue(addTeamCallback);
+    }
+
+    private GraphQLCall.Callback<ListTeamsQuery.Data> allTeamCallback = new GraphQLCall.Callback<ListTeamsQuery.Data>() {
+        @Override
+        public void onResponse(@Nonnull Response<ListTeamsQuery.Data> response) {
+            Log.d("AddTask.Callback", "made it to the callback success");
+            Handler h = new Handler(Looper.getMainLooper()){
+                @Override
+                public void handleMessage(Message message){
+                    teams.addAll(response.data().listTeams().items());
+
+                    LinkedList<String> teamNames = new LinkedList<>();
+
+                    for(ListTeamsQuery.Item team : teams){
+                        teamNames.add(team.name());
+                    }
+
+                    Spinner spinner = findViewById(R.id.spinnerAddTask);
+
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AddTask.this, android.R.layout.simple_spinner_item, teamNames);
+
+                    spinner.setAdapter(adapter);
+
+                    spinner.setOnItemSelectedListener(AddTask.this);
+                }
+            };
+            h.obtainMessage().sendToTarget();
+        }
+
+        @Override
+        public void onFailure(@Nonnull ApolloException e) {
+            Log.e("AddTask.Callback", e.getMessage());
+        }
+    };
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        Log.i("TeamSelected",Integer.toString(i));
+
+        Spinner spinner  = (Spinner)findViewById(R.id.spinnerAddTask);
+        String text = spinner.getSelectedItem().toString();
+        Log.i("TeamSelected", text);
+
+        for(ListTeamsQuery.Item team : teams){
+            if(team.name().equals(text)){
+                Log.i("TeamId?",team.id());
+                teamID = team.id();
+            }
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 }
 

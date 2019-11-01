@@ -17,9 +17,11 @@ import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.amazonaws.amplify.generated.graphql.CreateTeamMutation;
 import com.amazonaws.amplify.generated.graphql.ListTeamsQuery;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
+import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
@@ -27,6 +29,8 @@ import com.apollographql.apollo.exception.ApolloException;
 import java.util.LinkedList;
 
 import javax.annotation.Nonnull;
+
+import type.CreateTeamInput;
 
 public class Settings extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private String team;
@@ -59,8 +63,22 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
             editor.apply();
         });
 
+        Button saveTeamButton = findViewById(R.id.teamSaveButton);
+        saveTeamButton.setOnClickListener((event) -> {
+            TextView teamTextBox = findViewById(R.id.teamTextBox);
+            String teamName = teamTextBox.getText().toString();
+
+            CreateTeamInput input = CreateTeamInput.builder()
+                    .name(teamName)
+                    .build();
+            CreateTeamMutation createTeamMutation = CreateTeamMutation.builder().input(input).build();
+            awsAppSyncClient.mutate(createTeamMutation).enqueue(teamCreateCallback);
+        });
+
         ListTeamsQuery query = ListTeamsQuery.builder().build();
-        awsAppSyncClient.query(query).enqueue(allTeamCallback);
+        awsAppSyncClient.query(query)
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
+                .enqueue(allTeamCallback);
     }
 
     protected GraphQLCall.Callback<ListTeamsQuery.Data> allTeamCallback = new GraphQLCall.Callback<ListTeamsQuery.Data>() {
@@ -124,4 +142,16 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
     public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
+
+    public GraphQLCall.Callback teamCreateCallback = new GraphQLCall.Callback() {
+        @Override
+        public void onResponse(@Nonnull Response response) {
+            Log.i("Settings","team created");
+        }
+
+        @Override
+        public void onFailure(@Nonnull ApolloException e) {
+            Log.e("Settings",e.getMessage());
+        }
+    };
 }
