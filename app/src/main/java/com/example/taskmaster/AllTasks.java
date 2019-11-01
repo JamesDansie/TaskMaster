@@ -6,6 +6,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
@@ -59,10 +62,22 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
                 .enqueue(getAllTasksCallback);
     }
 
-    public GraphQLCall.Callback getAllTasksCallback = new GraphQLCall.Callback() {
+    public GraphQLCall.Callback<ListTasksQuery.Data> getAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
         @Override
-        public void onResponse(@Nonnull Response response) {
+        public void onResponse(@Nonnull Response<ListTasksQuery.Data> response) {
 
+            Handler h = new Handler(Looper.getMainLooper()){
+                public void handleMessage(Message inputMessage){
+                    List<ListTasksQuery.Item> items = response.data().listTasks().items();
+                    tasks.clear();
+
+                    for(ListTasksQuery.Item item : items){
+                        tasks.add(new Task(item));
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            };
+            h.obtainMessage().sendToTarget();
         }
 
         @Override
