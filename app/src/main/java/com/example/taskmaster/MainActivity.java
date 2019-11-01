@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.amazonaws.amplify.generated.graphql.GetTeamQuery;
 import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
@@ -43,7 +44,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskInteractionListener{
-    //TODO: I would like to replace ll with a hashtable, but it breaks... everything :(
     private List<Task> tasks;
 
     private RecyclerView recyclerView;
@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private AWSAppSyncClient awsAppSyncClient;
     private String username;
     private String team;
+    private String teamID;
 
     public AppDatabase db;
 
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.username = prefs.getString("username", "Interchangable Cog");
         this.team = prefs.getString("team","any");
+        this.teamID = prefs.getString("teamID","blue");
 
         if(username.length() == 0){
             username = "Interchangable Cog";
@@ -74,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         TextView userTasks = findViewById(R.id.textView8);
         userTasks.setText(username +"'s tasks are;");
 
-        queryAllTasks();
-
+//        queryAllTasks();
+        queryTeamTasks();
         //******************** Local DB *******************
 //        db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "tasks")
 //                .fallbackToDestructiveMigration()
@@ -145,6 +147,39 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     }
 
+    public void queryTeamTasks() {
+        awsAppSyncClient.query(GetTeamQuery.builder().id(teamID).build())
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
+                .enqueue(getTeamTasksCallback);
+    }
+    public GraphQLCall.Callback<GetTeamQuery.Data> getTeamTasksCallback = new GraphQLCall.Callback<GetTeamQuery.Data>() {
+        @Override
+        public void onResponse(@Nonnull com.apollographql.apollo.api.Response<GetTeamQuery.Data> response) {
+
+            Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
+                @Override
+                public void handleMessage(Message inputMessage){
+                    GetTeamQuery.GetTeam teamItem = response.data().getTeam();
+                    List<GetTeamQuery.Item> tasksItems = teamItem.tasks().items();
+
+                    tasks.clear();
+
+                    for(GetTeamQuery.Item taskItem : tasksItems){
+                        tasks.add(new Task(taskItem));
+                    }
+                    mAdapter.notifyDataSetChanged();
+                }
+            };
+            handlerForMainThread.obtainMessage().sendToTarget();
+        }
+
+        @Override
+        public void onFailure(@Nonnull ApolloException e) {
+
+        }
+    };
+
+
     //Get all the things
     public void queryAllTasks() {
         awsAppSyncClient.query(ListTasksQuery.builder().build())
@@ -152,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 .enqueue(getAllTasksCallback);
     }
     public GraphQLCall.Callback<ListTasksQuery.Data> getAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
-        final String TAG = "getAllTasksCallback";
+        final String TAG = "Main.getAllTasks";
 
         @Override
         public void onResponse(@Nonnull com.apollographql.apollo.api.Response<ListTasksQuery.Data> response) {
@@ -206,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
         System.out.println("************************");
-        Log.i("TaskToBePassedInPotato", task.toString());
+        Log.i("Main.TaskPassedInPotato", task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
 
         MainActivity.this.startActivity(goToDetailIntent);
@@ -245,7 +280,7 @@ class LogTasksCallback implements Callback {
         this.currentMainActivityInstance = currentMainActivityInstance;
     }
 
-    private static final String TAG = "Callback";
+    private static final String TAG = "Main.Callback";
 
     @Override
     public void onFailure(@NotNull Call call, @NotNull IOException e) {

@@ -51,14 +51,14 @@ public class Detail extends AppCompatActivity {
 //            db.taskDao().deleteByTitle(taskName);
 
             String idToBeDeleted = getIntent().getStringExtra("taskId");
-            Log.i("IdToBeDeleted",idToBeDeleted);
+            Log.i("Detail.IdToBeDeleted",idToBeDeleted);
             runDeleteTaskMutation(idToBeDeleted);
         });
     }
 
     //id is a dyno ID
     public void runDeleteTaskMutation(String id){
-        Log.i("IdToBeDelete", id);
+        Log.i("Detail.IdToBeDelete", id);
         DeleteTaskInput deleteTaskInput = DeleteTaskInput.builder()
                 .id(id)
                 .build();
@@ -67,7 +67,7 @@ public class Detail extends AppCompatActivity {
                 .enqueue(new GraphQLCall.Callback<DeleteTaskMutation.Data>() {
                     @Override
                     public void onResponse(@Nonnull Response<DeleteTaskMutation.Data> response) {
-                        Log.i("Delete","yay!");
+                        Log.i("Detail.Delete","yay!");
                     }
 
                     @Override

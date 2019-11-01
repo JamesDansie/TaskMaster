@@ -4,6 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
+import com.amazonaws.amplify.generated.graphql.GetTeamQuery;
 import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
 
 @Entity
@@ -43,6 +44,14 @@ public class Task {
     }
 
     public Task(ListTasksQuery.Item item){
+        this.title = item.name();
+        this.description = item.description();
+        this.status = item.status();
+        this.assignedUser = item.assignedUser();
+        this.idDyno = item.id();
+    }
+
+    public Task(GetTeamQuery.Item item){
         this.title = item.name();
         this.description = item.description();
         this.status = item.status();

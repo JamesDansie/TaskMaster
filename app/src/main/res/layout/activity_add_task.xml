@@ -29,7 +29,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        app:layout_constraintVertical_bias="0.35000002" />
+        app:layout_constraintVertical_bias="0.45" />
 
     <EditText
         android:id="@+id/AddTaskDescription"
@@ -38,7 +38,7 @@
         android:ems="10"
         android:hint="Task Description"
         android:inputType="textPersonName"
-        app:layout_constraintBottom_toTopOf="@+id/radioGroup"
+        app:layout_constraintBottom_toTopOf="@+id/spinnerAddTask"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/AddTaskTitle" />
@@ -48,55 +48,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Add Task"
-        app:layout_constraintBottom_toBottomOf="@+id/radioGroup"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.274"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/radioGroup" />
+        app:layout_constraintTop_toBottomOf="@+id/spinnerAddTask" />
 
-    <RadioGroup
-        android:id="@+id/radioGroup"
-        android:layout_width="wrap_content"
+    <Spinner
+        android:id="@+id/spinnerAddTask"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/AddTask"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/AddTaskDescription"
-        app:layout_constraintVertical_bias="0.19">
-
-
-        <RadioButton
-            android:id="@+id/radioButtonBlueTeam"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onRadioButtonClicked"
-            android:text="Blue Team"
-            app:layout_constraintBottom_toTopOf="@+id/radioButtonRedTeam"
-            app:layout_constraintTop_toBottomOf="@+id/AddTask"
-            tools:layout_editor_absoluteX="227dp" />
-
-        <RadioButton
-            android:id="@+id/radioButtonRedTeam"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onRadioButtonClicked"
-            android:text="Red Team"
-            app:layout_constraintBottom_toTopOf="@+id/radioButtonGreenTeam"
-            app:layout_constraintStart_toStartOf="@+id/radioButtonBlueTeam"
-            app:layout_constraintTop_toBottomOf="@+id/radioButtonBlueTeam" />
-
-        <RadioButton
-            android:id="@+id/radioButtonGreenTeam"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onRadioButtonClicked"
-            android:text="Green Team"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/radioButtonRedTeam"
-            app:layout_constraintTop_toBottomOf="@+id/radioButtonRedTeam" />
-
-
-    </RadioGroup>
+        app:layout_constraintTop_toBottomOf="@+id/AddTaskDescription" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
