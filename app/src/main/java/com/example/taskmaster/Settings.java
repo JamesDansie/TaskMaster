@@ -51,17 +51,6 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
                 .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
-        Button saveSettingsButton = findViewById(R.id.settingsSaveButton);
-        saveSettingsButton.setOnClickListener((event) -> {
-            TextView usernameTextBox = findViewById(R.id.usernameEditBox);
-            String username = usernameTextBox.getText().toString();
-
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-            SharedPreferences.Editor editor = prefs.edit();
-
-            editor.putString("username", username);
-            editor.apply();
-        });
 
         Button saveTeamButton = findViewById(R.id.teamSaveButton);
         saveTeamButton.setOnClickListener((event) -> {
