@@ -36,3 +36,6 @@ Added dynamoDB to store tasks in the cloud.
 
 2019/10/31
 Added teams to dynamoDB. Front page filters based off of the team in settings.
+
+2019/11/05
+Added Auth log in. Front page displays the user name, and changes on log out.
