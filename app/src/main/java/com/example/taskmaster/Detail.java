@@ -72,7 +72,7 @@ public class Detail extends AppCompatActivity {
 
                     @Override
                     public void onFailure(@Nonnull ApolloException e) {
-                        Log.i("Delete","sad :(");
+                        Log.i("Dettail.Delete","sad :(");
                     }
                 });
     }

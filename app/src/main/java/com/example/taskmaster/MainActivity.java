@@ -3,7 +3,6 @@ package com.example.taskmaster;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.room.Room;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,19 +17,19 @@ import android.widget.TextView;
 
 import com.amazonaws.amplify.generated.graphql.GetTeamQuery;
 import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.SignInUIOptions;
+import com.amazonaws.mobile.client.UserStateDetails;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.exception.ApolloException;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,8 +38,6 @@ import javax.annotation.Nonnull;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTaskInteractionListener{
@@ -73,8 +70,10 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         if(team == null){
             team = "any";
         }
-        TextView userTasks = findViewById(R.id.textView8);
-        userTasks.setText(username +"'s tasks are;");
+        String name = AWSMobileClient.getInstance().getUsername();
+
+        TextView userTasks = findViewById(R.id.textViewUserTasksMain);
+        userTasks.setText(name +"'s tasks are;");
 
 //        queryAllTasks();
         queryTeamTasks();
@@ -103,6 +102,24 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     }
 
+    protected void setUserName(String name){
+        Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(Message inputMessage){
+
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                SharedPreferences.Editor editor = prefs.edit();
+
+                editor.putString("username", name);
+                editor.apply();
+
+                TextView userTasks = findViewById(R.id.textViewUserTasksMain);
+                userTasks.setText(username +"'s tasks are;");
+            }
+        };
+        handlerForMainThread.obtainMessage().sendToTarget();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,6 +142,43 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 .build();
 
 
+        //****************** AWS Amplify ************
+
+        AWSMobileClient.getInstance().initialize(getApplicationContext(), new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
+            @Override
+            public void onResult(UserStateDetails result) {
+                Log.i("Main.LogIn", "onResult: " + result.getUserState().toString());
+
+                if(result.getUserState().toString().equals("SIGNED_OUT")){
+                    AWSMobileClient.getInstance().showSignIn(MainActivity.this,
+                            SignInUIOptions.builder()
+                                    .backgroundColor(1)
+                                    .logo(R.drawable.picolas)
+                            .build(),
+                            new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
+                                @Override
+                                public void onResult(UserStateDetails result) {
+                                    Log.i("Main.LogIn", "callback success " + result.getUserState().toString());
+                                    setUserName(AWSMobileClient.getInstance().getUsername());
+                                }
+
+                                @Override
+                                public void onError(Exception e) {
+                                    Log.e("Main.LogIn", "callback failure " + e.getMessage());
+                                }
+                            });
+
+                    }
+
+                }
+
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("Main.LogIn", "Initialization error.", e);
+            }
+        });
+
         //****************** Buttons ****************
 
         Button addTaskButton = findViewById(R.id.ButtonTaskAdd);
@@ -145,6 +199,34 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             MainActivity.this.startActivity(goToSettings);
         });
 
+        Button signInButton = findViewById(R.id.buttonSignIn);
+        signInButton.setOnClickListener((event) -> {
+            Log.i("Main.LogInButton", "I've been clicked");
+
+            AWSMobileClient.getInstance().showSignIn(MainActivity.this,
+                    SignInUIOptions.builder().backgroundColor(1).logo(R.drawable.picolas).build(),
+            new com.amazonaws.mobile.client.Callback<UserStateDetails>(){
+
+                @Override
+                public void onResult(UserStateDetails result) {
+                    Log.i("Main.LogInButton", result.getUserState().toString());
+                    setUserName(AWSMobileClient.getInstance().getUsername());
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    Log.e("Main.LogInButton", e.getMessage());
+
+                }
+            });
+        });
+
+        Button signOutButton = findViewById(R.id.buttonSignOut);
+        signOutButton.setOnClickListener((event) -> {
+            AWSMobileClient.getInstance().signOut();
+            Log.i("Main.LogOutButton", "I've been clicked");
+            setUserName("Interchangable Cog");
+        });
     }
 
     public void queryTeamTasks() {
@@ -176,60 +258,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         @Override
         public void onFailure(@Nonnull ApolloException e) {
 
-        }
-    };
-
-
-    //Get all the things
-    public void queryAllTasks() {
-        awsAppSyncClient.query(ListTasksQuery.builder().build())
-                .responseFetcher(AppSyncResponseFetchers.CACHE_AND_NETWORK)
-                .enqueue(getAllTasksCallback);
-    }
-    public GraphQLCall.Callback<ListTasksQuery.Data> getAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
-        final String TAG = "Main.getAllTasks";
-
-        @Override
-        public void onResponse(@Nonnull com.apollographql.apollo.api.Response<ListTasksQuery.Data> response) {
-            Log.i(TAG,response.data().listTasks().items().toString());
-
-            Handler handlerForMainThread = new Handler(Looper.getMainLooper().getMainLooper()){
-                @Override
-                public void handleMessage(Message inputMessage){
-                    List<ListTasksQuery.Item> items = response.data().listTasks().items();
-
-                    tasks.clear();
-                    //if statements sort based on team from settings page
-                    Log.i("TeamToBeAdded",team);
-                    for(ListTasksQuery.Item item : items){
-                        Log.i("ItemTobeAdded",item.toString());
-
-                        if(team.equals("any")){
-                            tasks.add(new Task(item));
-                        } else if (team.equals("red")){
-                            if(item.team().id().equals("red")){
-                                tasks.add(new Task(item));
-                            }
-                        } else if (team.equals("blue")){
-                            if(item.team().id().equals("blue")){
-                                tasks.add(new Task(item));
-                            }
-                        }  else if (team.equals("green")){
-                            if(item.team().id().equals("green")) {
-                                tasks.add(new Task(item));
-                            }
-                        }
-
-                    }
-                    mAdapter.notifyDataSetChanged();
-                }
-            };
-            handlerForMainThread.obtainMessage().sendToTarget();
-        }
-
-        @Override
-        public void onFailure(@Nonnull ApolloException e) {
-            Log.e(TAG, e.getMessage());
         }
     };
 

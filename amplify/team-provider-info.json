@@ -9,6 +9,11 @@
             "UnauthRoleName": "amplify-taskmaster-local-93053-unauthRole",
             "StackName": "amplify-taskmaster-local-93053",
             "StackId": "arn:aws:cloudformation:us-east-2:322239385824:stack/amplify-taskmaster-local-93053/a51627e0-fb32-11e9-8d7c-02402ec64522"
+        },
+        "categories": {
+            "auth": {
+                "taskmaster106b313f": {}
+            }
         }
     }
 }
