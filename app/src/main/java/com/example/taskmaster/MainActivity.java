@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         this.tasks = new LinkedList<>();
 
+        //TODO: Kill the local storage
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         this.username = prefs.getString("username", "Interchangable Cog");
         this.team = prefs.getString("team","any");
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 editor.apply();
 
                 TextView userTasks = findViewById(R.id.textViewUserTasksMain);
-                userTasks.setText(username +"'s tasks are;");
+                userTasks.setText(name +"'s tasks are;");
             }
         };
         handlerForMainThread.obtainMessage().sendToTarget();
@@ -142,8 +143,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 .build();
 
 
-        //****************** AWS Amplify ************
-
+        //****************** AWS Cognito ************
+        //TODO: have the logins go to the same method or class
         AWSMobileClient.getInstance().initialize(getApplicationContext(), new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
             @Override
             public void onResult(UserStateDetails result) {
@@ -223,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         Button signOutButton = findViewById(R.id.buttonSignOut);
         signOutButton.setOnClickListener((event) -> {
+            //TODO: after logout send to log in with a callback function
             AWSMobileClient.getInstance().signOut();
             Log.i("Main.LogOutButton", "I've been clicked");
             setUserName("Interchangable Cog");
@@ -242,14 +244,17 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 @Override
                 public void handleMessage(Message inputMessage){
                     GetTeamQuery.GetTeam teamItem = response.data().getTeam();
-                    List<GetTeamQuery.Item> tasksItems = teamItem.tasks().items();
+                    if(teamItem != null){
 
-                    tasks.clear();
+                        List<GetTeamQuery.Item> tasksItems = teamItem.tasks().items();
 
-                    for(GetTeamQuery.Item taskItem : tasksItems){
-                        tasks.add(new Task(taskItem));
+                        tasks.clear();
+
+                        for(GetTeamQuery.Item taskItem : tasksItems){
+                            tasks.add(new Task(taskItem));
+                        }
+                        mAdapter.notifyDataSetChanged();
                     }
-                    mAdapter.notifyDataSetChanged();
                 }
             };
             handlerForMainThread.obtainMessage().sendToTarget();
