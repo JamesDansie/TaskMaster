@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 .build();
 
 
-        //****************** AWS Amplify ************
+        //****************** AWS Cognito ************
         //TODO: have the logins go to the same method or class
         AWSMobileClient.getInstance().initialize(getApplicationContext(), new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
             @Override
