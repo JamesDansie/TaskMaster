@@ -7,12 +7,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -27,9 +29,19 @@ import android.widget.Toast;
 
 import com.amazonaws.amplify.generated.graphql.CreateTaskMutation;
 import com.amazonaws.amplify.generated.graphql.ListTeamsQuery;
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.Callback;
+import com.amazonaws.mobile.client.UserStateDetails;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferService;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.util.IOUtils;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
@@ -37,20 +49,30 @@ import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.StandardCopyOption;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import javax.annotation.Nonnull;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
+// if uncommented then will conflict with AWS Callbacks
+//import okhttp3.Call;
+//import okhttp3.Callback;
+//import okhttp3.MediaType;
+//import okhttp3.MultipartBody;
+//import okhttp3.OkHttpClient;
+//import okhttp3.Request;
+//import okhttp3.RequestBody;
 import type.CreateTaskInput;
 
 public class AddTask extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
@@ -61,9 +83,10 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     private String teamID;
     private static final int READ_REQUEST_CODE = 42;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final String TAG = "AddTask.OnCreate";
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
 
@@ -79,10 +102,6 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
         awsAppSyncClient.query(query)
                 .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
                 .enqueue(allTeamCallback);
-
-//        Button addFileButton = findViewById(R.id.buttonAddFile);
-//        addFileButton.setOnClickListener((event) -> {
-//        });
 
         Button submitTask = findViewById(R.id.AddTask);
         submitTask.setOnClickListener((event) -> {
@@ -250,7 +269,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
 
         // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
         // browser.
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        Intent intent = new Intent(Intent.ACTION_PICK);
 
         // Filter to only show results that can be "opened", such as a
         // file (as opposed to a list of contacts or timezones)
@@ -268,6 +287,8 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent resultData) {
 
+        final String TAG = "AddTask.OnActResult";
+
         // The ACTION_OPEN_DOCUMENT intent was sent with the request code
         // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
         // response to some other intent, and the code below shouldn't run at all.
@@ -277,13 +298,123 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
             // Instead, a URI to that document will be contained in the return intent
             // provided to this method as a parameter.
             // Pull that URI using resultData.getData().
-            Uri uri = null;
+
             if (resultData != null) {
-                uri = resultData.getData();
+                final Uri uri = resultData.getData();
                 Log.i("AddTask.onActResult", "Uri: " + uri.toString());
+
+                getApplicationContext().startService(new Intent(getApplicationContext(), TransferService.class));
+
+                // Initialize the AWSMobileClient if not initialized
+                AWSMobileClient.getInstance().initialize(getApplicationContext(), new Callback<UserStateDetails>() {
+                    @Override
+                    public void onResult(UserStateDetails userStateDetails) {
+                        Log.i(TAG, "AWSMobileClient initialized. User State is " + userStateDetails.getUserState());
+                        uploadWithTransferUtility(uri);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e(TAG, "Initialization error.", e);
+                    }
+                });
+
 //                showImage(uri);
             }
         }
     }
+
+    //from docs; https://aws-amplify.github.io/docs/android/storage
+    public void uploadWithTransferUtility(Uri uri) {
+        final String TAG = "AddTask.uploadTran";
+
+        TransferUtility transferUtility =
+                TransferUtility.builder()
+                        .context(getApplicationContext())
+                        .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                        .s3Client(new AmazonS3Client(AWSMobileClient.getInstance()))
+                        .build();
+
+//        File file = new File(getApplicationContext().getFilesDir(), "sample.txt");
+//        try {
+//            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+//            writer.append("Howdy World!");
+//            writer.close();
+//        }
+//        catch(Exception e) {
+//            Log.e(TAG, e.getMessage());
+//        }
+//
+        File file = new File(getPath(uri));
+//        File file = new File(uri.getPath());
+
+
+        TransferObserver uploadObserver =
+                transferUtility.upload(
+                        "test",
+                        file);
+//        try {
+//            InputStream inputStream = getContentResolver().openInputStream(uri);
+//            File targetFile = new File("src/main/res/junk.tmp");
+//
+//            java.nio.file.Files.copy(
+//                    inputStream,
+//                    targetFile.toPath(),
+//                    StandardCopyOption.REPLACE_EXISTING);
+//
+//            IOUtils.closeQuietly(inputStream);
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
+
+
+        // Attach a listener to the observer to get state update and progress notifications
+        uploadObserver.setTransferListener(new TransferListener() {
+
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                if (TransferState.COMPLETED == state) {
+                    // Handle a completed upload.
+                }
+            }
+
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
+                int percentDone = (int)percentDonef;
+
+                Log.d(TAG, "ID:" + id + " bytesCurrent: " + bytesCurrent
+                        + " bytesTotal: " + bytesTotal + " " + percentDone + "%");
+            }
+
+            @Override
+            public void onError(int id, Exception ex) {
+                // Handle errors
+            }
+
+        });
+
+        // If you prefer to poll for the data, instead of attaching a
+        // listener, check for the state and progress in the observer.
+        if (TransferState.COMPLETED == uploadObserver.getState()) {
+            // Handle a completed upload.
+        }
+
+        Log.d(TAG, "Bytes Transferred: " + uploadObserver.getBytesTransferred());
+        Log.d(TAG, "Bytes Total: " + uploadObserver.getBytesTotal());
+    }
+
+    public String getPath(Uri uri)
+    {
+        String[] projection = { MediaStore.Images.Media.DATA };
+        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+        if (cursor == null) return null;
+        int column_index =             cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String s=cursor.getString(column_index);
+        cursor.close();
+        return s;
+    }
+
 }
 

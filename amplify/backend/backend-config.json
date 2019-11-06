@@ -23,5 +23,11 @@
 			"providerPlugin": "awscloudformation",
 			"dependsOn": []
 		}
+	},
+	"storage": {
+		"StuffFromPhoneForTaskList": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
+		}
 	}
 }
