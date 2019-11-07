@@ -30,6 +30,7 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
     private RecyclerView.LayoutManager layoutManager;
     private List<Task> tasks;
     private AWSAppSyncClient awsAppSyncClient;
+    private static final String TAG = "Dansie";
 
 
     @Override
@@ -94,7 +95,7 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
         System.out.println("************************");
-        Log.i("AllTasks.Potato", task.toString());
+        Log.i(TAG, task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
 
         AllTasks.this.startActivity(goToDetailIntent);

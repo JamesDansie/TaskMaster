@@ -1,6 +1,7 @@
 package com.example.taskmaster;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.room.Room;
 
 import android.app.Activity;
@@ -59,9 +60,11 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nonnull;
 
@@ -74,6 +77,7 @@ import javax.annotation.Nonnull;
 //import okhttp3.Request;
 //import okhttp3.RequestBody;
 import type.CreateTaskInput;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
 public class AddTask extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private AppDatabase db;
@@ -82,15 +86,20 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     private String team;
     private String teamID;
     private static final int READ_REQUEST_CODE = 42;
+    private static final String TAG = "Dansie";
+    private String taskImageURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final String TAG = "AddTask.OnCreate";
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
 
         teams = new LinkedList<>();
+
+        getApplicationContext().startService(new Intent(getApplicationContext(), TransferService.class));
+        String[] permissions = {READ_EXTERNAL_STORAGE};
+        ActivityCompat.requestPermissions(this, permissions, 1);
 
         // Build a connection to AWS
         awsAppSyncClient = AWSAppSyncClient.builder()
@@ -185,19 +194,19 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                 awsAppSyncClient.mutate(mutation).enqueue(new GraphQLCall.Callback<CreateTaskMutation.Data>() {
                     @Override
                     public void onResponse(@Nonnull Response<CreateTaskMutation.Data> response) {
-                        Log.i("AddTask.Mutation","Success");
+                        Log.i(TAG,"AddTask.Mutation Success");
                     }
 
                     @Override
                     public void onFailure(@Nonnull ApolloException e) {
-                        Log.e("AddTask.MutationFail",e.getMessage());
+                        Log.e(TAG,"AddTask.MutationFail "+e.getMessage());
                     }
                 });
             }
 
             @Override
             public void onFailure(@Nonnull ApolloException e) {
-                Log.e("AddTask.AddTaskFail",e.getMessage());
+                Log.e(TAG,"AddTask.AddTaskFail "+e.getMessage());
             }
         };
 
@@ -210,7 +219,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     private GraphQLCall.Callback<ListTeamsQuery.Data> allTeamCallback = new GraphQLCall.Callback<ListTeamsQuery.Data>() {
         @Override
         public void onResponse(@Nonnull Response<ListTeamsQuery.Data> response) {
-            Log.d("AddTask.Callback", "made it to the callback success");
+            Log.d(TAG, "AddTask.Callback made it to the callback success");
             Handler h = new Handler(Looper.getMainLooper()){
                 @Override
                 public void handleMessage(Message message){
@@ -236,21 +245,21 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
 
         @Override
         public void onFailure(@Nonnull ApolloException e) {
-            Log.e("AddTask.Callback", e.getMessage());
+            Log.e(TAG,"AddTask.Callback "+ e.getMessage());
         }
     };
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.i("TeamSelected",Integer.toString(i));
+        Log.i(TAG,"TeamSelected "+Integer.toString(i));
 
         Spinner spinner  = (Spinner)findViewById(R.id.spinnerAddTask);
         String text = spinner.getSelectedItem().toString();
-        Log.i("TeamSelected", text);
+        Log.i(TAG,"TeamSelected "+ text);
 
         for(ListTeamsQuery.Item team : teams){
             if(team.name().equals(text)){
-                Log.i("TeamId?",team.id());
+                Log.i(TAG,"TeamId? "+team.id());
                 teamID = team.id();
             }
         }
@@ -265,21 +274,23 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     /**
      * Fires an intent to spin up the "file chooser" UI and select an image.
      */
-    public void performFileSearch(View v) {
+
+    //************************** Original S3 attempt *******************
+    public void pickFile(View v) {
 
         // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
         // browser.
-        Intent intent = new Intent(Intent.ACTION_PICK);
+        Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
-        // Filter to only show results that can be "opened", such as a
-        // file (as opposed to a list of contacts or timezones)
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-
-        // Filter to show only images, using the image MIME data type.
-        // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
-        // To search for all documents available via installed storage providers,
-        // it would be "*/*".
-        intent.setType("image/*");
+//        // Filter to only show results that can be "opened", such as a
+//        // file (as opposed to a list of contacts or timezones)
+//        intent.addCategory(Intent.CATEGORY_OPENABLE);
+//
+//        // Filter to show only images, using the image MIME data type.
+//        // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
+//        // To search for all documents available via installed storage providers,
+//        // it would be "*/*".
+//        intent.setType("image/*");
 
         startActivityForResult(intent, READ_REQUEST_CODE);
     }
@@ -287,13 +298,14 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent resultData) {
 
-        final String TAG = "AddTask.OnActResult";
 
         // The ACTION_OPEN_DOCUMENT intent was sent with the request code
         // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
         // response to some other intent, and the code below shouldn't run at all.
 
+        super.onActivityResult(requestCode, resultCode, resultData);
         if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            final String TAG = "Dansie";
             // The document selected by the user won't be returned in the intent.
             // Instead, a URI to that document will be contained in the return intent
             // provided to this method as a parameter.
@@ -301,7 +313,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
 
             if (resultData != null) {
                 final Uri uri = resultData.getData();
-                Log.i("AddTask.onActResult", "Uri: " + uri.toString());
+                Log.i(TAG,"AddTask.onActResult Uri: " + uri.toString());
 
                 getApplicationContext().startService(new Intent(getApplicationContext(), TransferService.class));
 
@@ -318,15 +330,13 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                         Log.e(TAG, "Initialization error.", e);
                     }
                 });
-
-//                showImage(uri);
             }
         }
     }
 
     //from docs; https://aws-amplify.github.io/docs/android/storage
     public void uploadWithTransferUtility(Uri uri) {
-        final String TAG = "AddTask.uploadTran";
+        final String TAG = "Dansie";
 
         TransferUtility transferUtility =
                 TransferUtility.builder()
@@ -335,38 +345,21 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                         .s3Client(new AmazonS3Client(AWSMobileClient.getInstance()))
                         .build();
 
-//        File file = new File(getApplicationContext().getFilesDir(), "sample.txt");
-//        try {
-//            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-//            writer.append("Howdy World!");
-//            writer.close();
-//        }
-//        catch(Exception e) {
-//            Log.e(TAG, e.getMessage());
-//        }
 //
+        Log.i(TAG,"AddTask.Path "+ getPath(uri));
         File file = new File(getPath(uri));
 //        File file = new File(uri.getPath());
+        Log.i(TAG,"AddTask.File "+file.toString());
 
+
+        String url = "https://taskmaster91489920ce494e5ba7c71e0fbb42d04c-local.s3.us-east-2.amazonaws.com/";
+        String key = String.format("public/%s", UUID.randomUUID().toString() + "_" + System.currentTimeMillis());
+        this.taskImageURL = url+key;
 
         TransferObserver uploadObserver =
                 transferUtility.upload(
-                        "test",
+                        key,
                         file);
-//        try {
-//            InputStream inputStream = getContentResolver().openInputStream(uri);
-//            File targetFile = new File("src/main/res/junk.tmp");
-//
-//            java.nio.file.Files.copy(
-//                    inputStream,
-//                    targetFile.toPath(),
-//                    StandardCopyOption.REPLACE_EXISTING);
-//
-//            IOUtils.closeQuietly(inputStream);
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
 
         // Attach a listener to the observer to get state update and progress notifications
         uploadObserver.setTransferListener(new TransferListener() {
@@ -375,6 +368,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
             public void onStateChanged(int id, TransferState state) {
                 if (TransferState.COMPLETED == state) {
                     // Handle a completed upload.
+                    Log.i(TAG,"upload success");
                 }
             }
 
@@ -415,6 +409,74 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
         cursor.close();
         return s;
     }
+
+//    //*************************** copy pasta from sharina *******************
+//// =========== Pick a File using S3 ================
+//    // https://developer.android.com/guide/topics/providers/document-provider
+//    public void pickFile (View v) {
+//        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        startActivityForResult(intent, READ_REQUEST_CODE);
+//    }
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode,
+//                                 Intent resultData) {
+//        String TAG = "AddTask";
+//        super.onActivityResult(requestCode, resultCode, resultData);
+//        // The ACTION_OPEN_DOCUMENT intent was sent with the request code
+//        // READ_REQUEST_CODE. If the request code seen here doesn't match, it's the
+//        // response to some other intent, and the code below shouldn't run at all.
+//        if (requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+//            // The document selected by the user won't be returned in the intent.
+//            // Instead, a URI to that document will be contained in the return intent
+//            // provided to this method as a parameter.
+//            // Pull that URI using resultData.getData().
+//            Uri uri = null;
+//            if (resultData != null) {
+//                uri = resultData.getData();
+//                Log.i(TAG, "Uri: " + uri.toString());
+//                // actually get path from URI
+//                Uri selectedImage = uri;
+//                String[] filePathColumn = {MediaStore.Images.Media.DATA};
+//                Cursor cursor = getContentResolver().query(selectedImage,
+//                        filePathColumn, null, null, null);
+//                Log.i(TAG, "cursor: " + cursor);
+//                cursor.moveToFirst();
+//                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+//                String picturePath = cursor.getString(columnIndex);
+//                cursor.close();
+//                TransferUtility transferUtility =
+//                        TransferUtility.builder()
+//                                .context(getApplicationContext())
+//                                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+//                                .s3Client(new AmazonS3Client(AWSMobileClient.getInstance()))
+//                                .build();
+//                TransferObserver uploadObserver =
+//                        transferUtility.upload(
+//                                // filename in the cloud
+//                                "public/picolas.png",
+//                                new File(picturePath));
+//                // Attach a listener to the observer to get state update and progress notifications
+//                uploadObserver.setTransferListener(new TransferListener() {
+//                    @Override
+//                    public void onStateChanged(int id, TransferState state) {
+//                        if (TransferState.COMPLETED == state) {
+//                            // Handle a completed upload.
+//                        }
+//                    }
+//                    @Override
+//                    public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+//                        float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
+//                        int percentDone = (int)percentDonef;
+//                        Log.d(TAG, "ID:" + id + " bytesCurrent: " + bytesCurrent
+//                                + " bytesTotal: " + bytesTotal + " " + percentDone + "%");
+//                    }
+//                    @Override
+//                    public void onError(int id, Exception ex) {
+//                    }
+//                });
+//            }
+//        }
+//    }
 
 }
 

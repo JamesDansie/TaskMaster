@@ -23,6 +23,7 @@ public class Detail extends AppCompatActivity {
 
     public AppDatabase db;
     private AWSAppSyncClient awsAppSyncClient;
+    private final String TAG = "Dansie";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,14 +52,14 @@ public class Detail extends AppCompatActivity {
 //            db.taskDao().deleteByTitle(taskName);
 
             String idToBeDeleted = getIntent().getStringExtra("taskId");
-            Log.i("Detail.IdToBeDeleted",idToBeDeleted);
+            Log.i(TAG,"Detail.IdToBeDeleted " + idToBeDeleted);
             runDeleteTaskMutation(idToBeDeleted);
         });
     }
 
     //id is a dyno ID
     public void runDeleteTaskMutation(String id){
-        Log.i("Detail.IdToBeDelete", id);
+        Log.i(TAG,"Detail.IdToBeDelete "+ id);
         DeleteTaskInput deleteTaskInput = DeleteTaskInput.builder()
                 .id(id)
                 .build();
@@ -67,12 +68,12 @@ public class Detail extends AppCompatActivity {
                 .enqueue(new GraphQLCall.Callback<DeleteTaskMutation.Data>() {
                     @Override
                     public void onResponse(@Nonnull Response<DeleteTaskMutation.Data> response) {
-                        Log.i("Detail.Delete","yay!");
+                        Log.i(TAG,"Detail.Delete yay!");
                     }
 
                     @Override
                     public void onFailure(@Nonnull ApolloException e) {
-                        Log.i("Dettail.Delete","sad :(");
+                        Log.i(TAG,"Dettail.Delete sad :(");
                     }
                 });
     }
