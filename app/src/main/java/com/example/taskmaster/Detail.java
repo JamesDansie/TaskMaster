@@ -47,7 +47,7 @@ public class Detail extends AppCompatActivity {
         taskDesc.setText(taskDescription);
 
         String imageURL = getIntent().getStringExtra("imageURL");
-        
+
         Log.i(TAG, "image url "+imageURL);
         if(imageURL != null && imageURL.length() > 2){
             ImageView taskImage = findViewById(R.id.taskImage);
