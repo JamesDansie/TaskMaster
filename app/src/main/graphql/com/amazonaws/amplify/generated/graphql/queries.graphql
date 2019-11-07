@@ -13,6 +13,7 @@ query GetTask($id: ID!) {
         nextToken
       }
     }
+    imageURL
   }
 }
 query ListTasks(
@@ -31,6 +32,7 @@ query ListTasks(
         id
         name
       }
+      imageURL
     }
     nextToken
   }
@@ -46,6 +48,7 @@ query GetTeam($id: ID!) {
         description
         assignedUser
         status
+        imageURL
       }
       nextToken
     }

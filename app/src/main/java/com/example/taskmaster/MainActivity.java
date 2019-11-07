@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                 if(result.getUserState().toString().equals("SIGNED_OUT")){
                     AWSMobileClient.getInstance().showSignIn(MainActivity.this,
                             SignInUIOptions.builder()
-                                    .backgroundColor(1)
+                                    .backgroundColor(R.color.colorPrimary)
                                     .logo(R.drawable.picolas)
                             .build(),
                             new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
@@ -206,7 +206,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             Log.i(TAG, "Main.LogInButton I've been clicked");
 
             AWSMobileClient.getInstance().showSignIn(MainActivity.this,
-                    SignInUIOptions.builder().backgroundColor(1).logo(R.drawable.picolas).build(),
+                    SignInUIOptions.builder().backgroundColor(R.color.colorPrimary).logo(R.drawable.picolas).build(),
             new com.amazonaws.mobile.client.Callback<UserStateDetails>(){
 
                 @Override
@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         System.out.println("************************");
         Log.i(TAG, "Main.TaskPassedInPotato "+task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
+        goToDetailIntent.putExtra("imageURL", task.getImageURL());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }

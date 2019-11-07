@@ -13,6 +13,7 @@ mutation CreateTask($input: CreateTaskInput!) {
         nextToken
       }
     }
+    imageURL
   }
 }
 mutation UpdateTask($input: UpdateTaskInput!) {
@@ -29,6 +30,7 @@ mutation UpdateTask($input: UpdateTaskInput!) {
         nextToken
       }
     }
+    imageURL
   }
 }
 mutation DeleteTask($input: DeleteTaskInput!) {
@@ -45,6 +47,7 @@ mutation DeleteTask($input: DeleteTaskInput!) {
         nextToken
       }
     }
+    imageURL
   }
 }
 mutation CreateTeam($input: CreateTeamInput!) {
@@ -58,6 +61,7 @@ mutation CreateTeam($input: CreateTeamInput!) {
         description
         assignedUser
         status
+        imageURL
       }
       nextToken
     }
@@ -74,6 +78,7 @@ mutation UpdateTeam($input: UpdateTeamInput!) {
         description
         assignedUser
         status
+        imageURL
       }
       nextToken
     }
@@ -90,6 +95,7 @@ mutation DeleteTeam($input: DeleteTeamInput!) {
         description
         assignedUser
         status
+        imageURL
       }
       nextToken
     }

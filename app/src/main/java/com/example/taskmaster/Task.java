@@ -25,6 +25,7 @@ public class Task {
     private String title;
     private String description;
     private String assignedUser;
+    private String imageURL;
 
     @TypeConverters(StatusConverter.class)
     private String status;
@@ -49,6 +50,7 @@ public class Task {
         this.status = item.status();
         this.assignedUser = item.assignedUser();
         this.idDyno = item.id();
+        this.imageURL = item.imageURL();
     }
 
     public Task(GetTeamQuery.Item item){
@@ -57,6 +59,7 @@ public class Task {
         this.status = item.status();
         this.assignedUser = item.assignedUser();
         this.idDyno = item.id();
+        this.imageURL = item.imageURL();
     }
 
     public String getTitle() {
@@ -75,7 +78,13 @@ public class Task {
         this.description = description;
     }
 
+    public String getImageURL() {
+        return imageURL;
+    }
 
+    public void setImageURL(String taskImageURL) {
+        this.imageURL = taskImageURL;
+    }
 
     public long getId() {
         return id;
@@ -109,6 +118,7 @@ public class Task {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", assignedUser='" + assignedUser + '\'' +
+                ", imageURL='" + imageURL + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

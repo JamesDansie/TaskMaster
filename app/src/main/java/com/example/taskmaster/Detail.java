@@ -6,6 +6,7 @@ import androidx.room.Room;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.amazonaws.amplify.generated.graphql.DeleteTaskMutation;
@@ -14,6 +15,7 @@ import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.squareup.picasso.Picasso;
 
 import javax.annotation.Nonnull;
 
@@ -43,6 +45,15 @@ public class Detail extends AppCompatActivity {
         String taskDescription = getIntent().getStringExtra("taskDescription");
         TextView taskDesc =  findViewById(R.id.taskDescriptionDetailText);
         taskDesc.setText(taskDescription);
+
+        String imageURL = getIntent().getStringExtra("imageURL");
+        
+        Log.i(TAG, "image url "+imageURL);
+        if(imageURL != null && imageURL.length() > 2){
+            ImageView taskImage = findViewById(R.id.taskImage);
+            Picasso.get().load(imageURL).into(taskImage);
+
+        }
 
         Button deleteButton = findViewById(R.id.DetailDeleteTask);
         deleteButton.setOnClickListener((event) -> {

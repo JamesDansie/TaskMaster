@@ -87,7 +87,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     private String teamID;
     private static final int READ_REQUEST_CODE = 42;
     private static final String TAG = "Dansie";
-    private String taskImageURL;
+    private String imageURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -134,6 +134,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
             String username = prefs.getString("username", "Interchangable Cog");
             newTask.setAssignedUser(username);
+            newTask.setImageURL(imageURL);
 
             // Saving the new task
             runAddTaskMutation(newTask);
@@ -189,6 +190,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                         .status(newTask.getStatus())
                         .assignedUser(newTask.getAssignedUser())
                         .taskTeamId(teamID)
+                        .imageURL(newTask.getImageURL())
                         .build();
                 CreateTaskMutation mutation = CreateTaskMutation.builder().input(input).build();
                 awsAppSyncClient.mutate(mutation).enqueue(new GraphQLCall.Callback<CreateTaskMutation.Data>() {
@@ -354,7 +356,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
 
         String url = "https://taskmaster91489920ce494e5ba7c71e0fbb42d04c-local.s3.us-east-2.amazonaws.com/";
         String key = String.format("public/%s", UUID.randomUUID().toString() + "_" + System.currentTimeMillis());
-        this.taskImageURL = url+key;
+        this.imageURL = url+key;
 
         TransferObserver uploadObserver =
                 transferUtility.upload(
