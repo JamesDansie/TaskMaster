@@ -259,6 +259,18 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "imageURL",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "inputFields": null,
@@ -420,6 +432,16 @@
                     },
                     {
                         "name": "status",
+                        "description": null,
+                        "type": {
+                            "kind": "INPUT_OBJECT",
+                            "name": "ModelStringFilterInput",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "imageURL",
                         "description": null,
                         "type": {
                             "kind": "INPUT_OBJECT",
@@ -1119,6 +1141,16 @@
                         "defaultValue": null
                     },
                     {
+                        "name": "imageURL",
+                        "description": null,
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
                         "name": "taskTeamId",
                         "description": null,
                         "type": {
@@ -1185,6 +1217,16 @@
                     },
                     {
                         "name": "status",
+                        "description": null,
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "imageURL",
                         "description": null,
                         "type": {
                             "kind": "SCALAR",

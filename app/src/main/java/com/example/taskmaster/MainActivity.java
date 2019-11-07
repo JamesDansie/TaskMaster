@@ -50,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     private String username;
     private String team;
     private String teamID;
+    private final String TAG = "Dansie";
 
     public AppDatabase db;
 
@@ -148,24 +149,24 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         AWSMobileClient.getInstance().initialize(getApplicationContext(), new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
             @Override
             public void onResult(UserStateDetails result) {
-                Log.i("Main.LogIn", "onResult: " + result.getUserState().toString());
+                Log.i(TAG, "Main.LogIn onResult: " + result.getUserState().toString());
 
                 if(result.getUserState().toString().equals("SIGNED_OUT")){
                     AWSMobileClient.getInstance().showSignIn(MainActivity.this,
                             SignInUIOptions.builder()
-                                    .backgroundColor(1)
+                                    .backgroundColor(R.color.colorPrimary)
                                     .logo(R.drawable.picolas)
                             .build(),
                             new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
                                 @Override
                                 public void onResult(UserStateDetails result) {
-                                    Log.i("Main.LogIn", "callback success " + result.getUserState().toString());
+                                    Log.i(TAG, "Main.LogIn callback success " + result.getUserState().toString());
                                     setUserName(AWSMobileClient.getInstance().getUsername());
                                 }
 
                                 @Override
                                 public void onError(Exception e) {
-                                    Log.e("Main.LogIn", "callback failure " + e.getMessage());
+                                    Log.e(TAG, "Main.LogIn callback failure " + e.getMessage());
                                 }
                             });
 
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
             @Override
             public void onError(Exception e) {
-                Log.e("Main.LogIn", "Initialization error.", e);
+                Log.e(TAG, "Main.LogIn Initialization error.", e);
             }
         });
 
@@ -202,21 +203,21 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         Button signInButton = findViewById(R.id.buttonSignIn);
         signInButton.setOnClickListener((event) -> {
-            Log.i("Main.LogInButton", "I've been clicked");
+            Log.i(TAG, "Main.LogInButton I've been clicked");
 
             AWSMobileClient.getInstance().showSignIn(MainActivity.this,
-                    SignInUIOptions.builder().backgroundColor(1).logo(R.drawable.picolas).build(),
+                    SignInUIOptions.builder().backgroundColor(R.color.colorPrimary).logo(R.drawable.picolas).build(),
             new com.amazonaws.mobile.client.Callback<UserStateDetails>(){
 
                 @Override
                 public void onResult(UserStateDetails result) {
-                    Log.i("Main.LogInButton", result.getUserState().toString());
+                    Log.i(TAG, "Main.LogInButton "+ result.getUserState().toString());
                     setUserName(AWSMobileClient.getInstance().getUsername());
                 }
 
                 @Override
                 public void onError(Exception e) {
-                    Log.e("Main.LogInButton", e.getMessage());
+                    Log.e(TAG, "Main.LogInButton "+e.getMessage());
 
                 }
             });
@@ -226,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         signOutButton.setOnClickListener((event) -> {
             //TODO: after logout send to log in with a callback function
             AWSMobileClient.getInstance().signOut();
-            Log.i("Main.LogOutButton", "I've been clicked");
+            Log.i(TAG,"Main.LogOutButton I've been clicked");
             setUserName("Interchangable Cog");
         });
     }
@@ -274,8 +275,9 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("taskDescription", task.getDescription());
 
         System.out.println("************************");
-        Log.i("Main.TaskPassedInPotato", task.toString());
+        Log.i(TAG, "Main.TaskPassedInPotato "+task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
+        goToDetailIntent.putExtra("imageURL", task.getImageURL());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }
@@ -313,7 +315,7 @@ class LogTasksCallback implements Callback {
         this.currentMainActivityInstance = currentMainActivityInstance;
     }
 
-    private static final String TAG = "Main.Callback";
+    private static final String TAG = "Dansie Main.Callback";
 
     @Override
     public void onFailure(@NotNull Call call, @NotNull IOException e) {

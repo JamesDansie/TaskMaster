@@ -6,6 +6,7 @@ import androidx.room.Room;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.amazonaws.amplify.generated.graphql.DeleteTaskMutation;
@@ -14,6 +15,7 @@ import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.squareup.picasso.Picasso;
 
 import javax.annotation.Nonnull;
 
@@ -23,6 +25,7 @@ public class Detail extends AppCompatActivity {
 
     public AppDatabase db;
     private AWSAppSyncClient awsAppSyncClient;
+    private final String TAG = "Dansie";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,15 @@ public class Detail extends AppCompatActivity {
         TextView taskDesc =  findViewById(R.id.taskDescriptionDetailText);
         taskDesc.setText(taskDescription);
 
+        String imageURL = getIntent().getStringExtra("imageURL");
+
+        Log.i(TAG, "image url "+imageURL);
+        if(imageURL != null && imageURL.length() > 2){
+            ImageView taskImage = findViewById(R.id.taskImage);
+            Picasso.get().load(imageURL).into(taskImage);
+
+        }
+
         Button deleteButton = findViewById(R.id.DetailDeleteTask);
         deleteButton.setOnClickListener((event) -> {
 
@@ -51,14 +63,14 @@ public class Detail extends AppCompatActivity {
 //            db.taskDao().deleteByTitle(taskName);
 
             String idToBeDeleted = getIntent().getStringExtra("taskId");
-            Log.i("Detail.IdToBeDeleted",idToBeDeleted);
+            Log.i(TAG,"Detail.IdToBeDeleted " + idToBeDeleted);
             runDeleteTaskMutation(idToBeDeleted);
         });
     }
 
     //id is a dyno ID
     public void runDeleteTaskMutation(String id){
-        Log.i("Detail.IdToBeDelete", id);
+        Log.i(TAG,"Detail.IdToBeDelete "+ id);
         DeleteTaskInput deleteTaskInput = DeleteTaskInput.builder()
                 .id(id)
                 .build();
@@ -67,12 +79,12 @@ public class Detail extends AppCompatActivity {
                 .enqueue(new GraphQLCall.Callback<DeleteTaskMutation.Data>() {
                     @Override
                     public void onResponse(@Nonnull Response<DeleteTaskMutation.Data> response) {
-                        Log.i("Detail.Delete","yay!");
+                        Log.i(TAG,"Detail.Delete yay!");
                     }
 
                     @Override
                     public void onFailure(@Nonnull ApolloException e) {
-                        Log.i("Dettail.Delete","sad :(");
+                        Log.i(TAG,"Dettail.Delete sad :(");
                     }
                 });
     }

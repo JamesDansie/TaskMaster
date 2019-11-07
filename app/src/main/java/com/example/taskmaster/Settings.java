@@ -36,6 +36,7 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
     private String team;
     private LinkedList<ListTeamsQuery.Item> teams;
     private AWSAppSyncClient awsAppSyncClient;
+    private final String TAG = "Dansie";
 
 
 
@@ -73,7 +74,7 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
     protected GraphQLCall.Callback<ListTeamsQuery.Data> allTeamCallback = new GraphQLCall.Callback<ListTeamsQuery.Data>() {
         @Override
         public void onResponse(@Nonnull Response<ListTeamsQuery.Data> response) {
-            Log.d("Settings.Callback", "made it to the callback success");
+            Log.d(TAG, "Settings.Callback made it to the callback success");
             Handler h = new Handler(Looper.getMainLooper()){
                 @Override
                 public void handleMessage(Message message){
@@ -99,22 +100,22 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
 
         @Override
         public void onFailure(@Nonnull ApolloException e) {
-            Log.e("Settings.Callback", e.getMessage());
+            Log.e(TAG,"Settings.Callback "+ e.getMessage());
         }
     };
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        Log.i("TeamSelected",Integer.toString(i));
+        Log.i(TAG,"TeamSelected "+Integer.toString(i));
 
         Spinner spinner  = (Spinner)findViewById(R.id.teamSpinner);
         String text = spinner.getSelectedItem().toString();
-        Log.i("TeamSelected", text);
+        Log.i(TAG, "TeamSelected "+text);
 
         String teamID = "";
         for(ListTeamsQuery.Item team : teams){
             if(team.name().equals(text)){
-                Log.i("TeamId?",team.id());
+                Log.i(TAG,"TeamId? "+team.id());
                 teamID = team.id();
             }
         }
@@ -135,12 +136,12 @@ public class Settings extends AppCompatActivity implements AdapterView.OnItemSel
     public GraphQLCall.Callback teamCreateCallback = new GraphQLCall.Callback() {
         @Override
         public void onResponse(@Nonnull Response response) {
-            Log.i("Settings","team created");
+            Log.i(TAG,"Settings team created");
         }
 
         @Override
         public void onFailure(@Nonnull ApolloException e) {
-            Log.e("Settings",e.getMessage());
+            Log.e(TAG,"Settings "+e.getMessage());
         }
     };
 }

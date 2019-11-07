@@ -5,6 +5,7 @@ type Task @model {
   assignedUser: String
   status: String
   team: Team @connection(name:"TeamTasks")
+  imageURL: String
 }
 type Team @model {
   id: ID!

@@ -14,6 +14,7 @@ import java.util.List;
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
     private List<Task> tasks;
     private OnTaskInteractionListener listener;
+    private final String TAG = "Dansie";
 
     public TaskAdapter(List<Task> tasks, OnTaskInteractionListener listener) {
         this.tasks = tasks;
@@ -43,8 +44,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         v.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i("TaskAdap.PotatoListner","I was clicked");
-                Log.i("TaskAdap.taskToListner", holder.task.toString());
+                Log.i(TAG,"TaskAdap.PotatoListner I was clicked");
+                Log.i(TAG, "TaskAdap.taskToListner "+holder.task.toString());
                 listener.potato(holder.task);
             }
         });
