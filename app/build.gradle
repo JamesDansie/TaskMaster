@@ -6,7 +6,7 @@ android {
     defaultConfig {
         applicationId "com.example.taskmaster"
         minSdkVersion 23
-        targetSdkVersion 23
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -26,6 +26,17 @@ android {
 apply plugin: 'com.amazonaws.appsync'
 
 dependencies {
+    //********Google stuff***********
+    implementation 'com.google.firebase:firebase-analytics:16.0.1'
+
+    // Overrides an auth dependency to ensure correct behavior
+    implementation 'com.google.android.gms:play-services-auth:15.0.1'
+
+    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-messaging:17.3.0'
+
+    implementation 'com.amazonaws:aws-android-sdk-pinpoint:2.15.+'
+
     //For AWSMobileClient only:
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.15.+'
 
@@ -62,3 +73,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     testImplementation("com.squareup.okhttp3:mockwebserver:4.2.1")
 }
+
+apply plugin: 'com.google.gms.google-services'
