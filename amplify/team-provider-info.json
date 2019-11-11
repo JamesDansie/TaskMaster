@@ -13,6 +13,13 @@
         "categories": {
             "auth": {
                 "taskmaster106b313f": {}
+            },
+            "notifications": {
+                "Pinpoint": {
+                    "Name": "TaskMasterCccSG-local",
+                    "Id": "afcc21e687de40a88e5916d51e3cc413",
+                    "Region": "us-east-1"
+                }
             }
         }
     }
