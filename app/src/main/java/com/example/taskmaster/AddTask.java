@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.room.Room;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -50,13 +51,17 @@ import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.StandardCopyOption;
@@ -100,6 +105,46 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
         getApplicationContext().startService(new Intent(getApplicationContext(), TransferService.class));
         String[] permissions = {READ_EXTERNAL_STORAGE};
         ActivityCompat.requestPermissions(this, permissions, 1);
+
+        //****************** Handling shares? **************
+        // Get the intent that started this activity
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if(Intent.ACTION_SEND.equals(action) && type != null){
+            // Figure out what to do based on the intent type
+            if (intent.getType().indexOf("image/") != -1) {
+//                // Handle intents with image data ...
+                Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+                Log.i(TAG, "image from external share uri: " + uri);
+                Log.i(TAG, "image from external share path: " + uri.getPath());
+
+                File f = new File(getFilesDir(), "tmp");
+
+                try {
+                    InputStream inputStream = getContentResolver().openInputStream(uri);
+                    byte[] buffer = new byte[inputStream.available()];
+                    inputStream.read(buffer);
+
+                    OutputStream outputStream = new FileOutputStream(f);
+                    outputStream.write(buffer);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
+                } catch (IOException e){
+                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
+                }
+
+                uploadWithTransferUtility(f);
+
+            } else if (intent.getType().equals("text/plain")) {
+                // Handle intents with text ...
+            }
+        }
 
         // Build a connection to AWS
         awsAppSyncClient = AWSAppSyncClient.builder()
@@ -347,9 +392,12 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                         .s3Client(new AmazonS3Client(AWSMobileClient.getInstance()))
                         .build();
 
-//
-        Log.i(TAG,"AddTask.Path "+ getPath(uri));
-        File file = new File(getPath(uri));
+
+        String path = getPath(uri);
+
+
+        Log.i(TAG,"AddTask.Path "+ path);
+        File file = new File(path);
 //        File file = new File(uri.getPath());
         Log.i(TAG,"AddTask.File "+file.toString());
 
@@ -362,6 +410,63 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                 transferUtility.upload(
                         key,
                         file);
+
+        // Attach a listener to the observer to get state update and progress notifications
+        uploadObserver.setTransferListener(new TransferListener() {
+
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                if (TransferState.COMPLETED == state) {
+                    // Handle a completed upload.
+                    Log.i(TAG,"upload success");
+                }
+            }
+
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
+                int percentDone = (int)percentDonef;
+
+                Log.d(TAG, "ID:" + id + " bytesCurrent: " + bytesCurrent
+                        + " bytesTotal: " + bytesTotal + " " + percentDone + "%");
+            }
+
+            @Override
+            public void onError(int id, Exception ex) {
+                // Handle errors
+            }
+
+        });
+
+        // If you prefer to poll for the data, instead of attaching a
+        // listener, check for the state and progress in the observer.
+        if (TransferState.COMPLETED == uploadObserver.getState()) {
+            // Handle a completed upload.
+        }
+
+        Log.d(TAG, "Bytes Transferred: " + uploadObserver.getBytesTransferred());
+        Log.d(TAG, "Bytes Total: " + uploadObserver.getBytesTotal());
+    }
+    //from docs; https://aws-amplify.github.io/docs/android/storage
+    public void uploadWithTransferUtility(File fileIn) {
+        final String TAG = "Dansie";
+
+        TransferUtility transferUtility =
+                TransferUtility.builder()
+                        .context(getApplicationContext())
+                        .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                        .s3Client(new AmazonS3Client(AWSMobileClient.getInstance()))
+                        .build();
+
+
+        String url = "https://taskmaster91489920ce494e5ba7c71e0fbb42d04c-local.s3.us-east-2.amazonaws.com/";
+        String key = String.format("public/%s", UUID.randomUUID().toString() + "_" + System.currentTimeMillis());
+        this.imageURL = url+key;
+
+        TransferObserver uploadObserver =
+                transferUtility.upload(
+                        key,
+                        fileIn);
 
         // Attach a listener to the observer to get state update and progress notifications
         uploadObserver.setTransferListener(new TransferListener() {
