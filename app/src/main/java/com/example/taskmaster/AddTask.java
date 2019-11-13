@@ -1,5 +1,6 @@
 package com.example.taskmaster;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.room.Room;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +49,10 @@ import com.amazonaws.util.IOUtils;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
@@ -93,6 +99,8 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     private static final int READ_REQUEST_CODE = 42;
     private static final String TAG = "Dansie";
     private String imageURL;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +131,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
 
                 File f = new File(getFilesDir(), "tmp");
 
+                // converting file to a stream input to rebuild in a file I can control/use
                 try {
                     InputStream inputStream = getContentResolver().openInputStream(uri);
                     byte[] buffer = new byte[inputStream.available()];
@@ -146,12 +155,35 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
             }
         }
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationProviderClient.getLastLocation()
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, e.getMessage());
+                    }
+                })
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // Got last known location. In some rare situations this can be null.
+                        if (location != null) {
+                            // Logic to handle location object
+                            Log.i(TAG, "Location object is: " + location.toString());
+                        }
+                        Log.i(TAG, "Loc Obj is " +location);
+                    }
+
+                });
+        Log.i(TAG, fusedLocationProviderClient.toString());
+
         // Build a connection to AWS
         awsAppSyncClient = AWSAppSyncClient.builder()
                 .context(getApplicationContext())
                 .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
+        //dynamoDB stuff to get a list of teams
         ListTeamsQuery query = ListTeamsQuery.builder().build();
         awsAppSyncClient.query(query)
                 .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
