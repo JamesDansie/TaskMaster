@@ -97,6 +97,9 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
         System.out.println("************************");
         Log.i(TAG, task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
+        goToDetailIntent.putExtra("latitude", task.getLatitude());
+        goToDetailIntent.putExtra("longitude", task.getLongitude());
+
 
         AllTasks.this.startActivity(goToDetailIntent);
     }

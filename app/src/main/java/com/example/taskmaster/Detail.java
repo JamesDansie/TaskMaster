@@ -47,12 +47,15 @@ public class Detail extends AppCompatActivity {
         taskDesc.setText(taskDescription);
 
         String longStr = getIntent().getStringExtra("longitude");
-        TextView longView = findViewById(R.id.LongitudeText);
-        longView.setText(String.format("The Longitude is: %s", longStr));
+        if(longStr != null){
 
-        String latStr = getIntent().getStringExtra("latitude");
-        TextView latView = findViewById(R.id.LatitudeText);
-        latView.setText(String.format("The Longitude is: %s", latStr));
+            TextView longView = findViewById(R.id.LongitudeText);
+            longView.setText(String.format("The Longitude is: %s", longStr));
+
+            String latStr = getIntent().getStringExtra("latitude");
+            TextView latView = findViewById(R.id.LatitudeText);
+            latView.setText(String.format("The Longitude is: %s", latStr));
+        }
 
         String imageURL = getIntent().getStringExtra("imageURL");
 

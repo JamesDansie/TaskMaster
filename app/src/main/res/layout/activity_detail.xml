@@ -12,7 +12,7 @@
         android:layout_height="132dp"
         android:layout_marginTop="100dp"
         android:text="Task Title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
         app:layout_constraintStart_toStartOf="@+id/taskDescriptionDetailText"
         app:layout_constraintTop_toTopOf="parent" />
 
