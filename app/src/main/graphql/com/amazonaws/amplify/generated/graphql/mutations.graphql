@@ -14,6 +14,8 @@ mutation CreateTask($input: CreateTaskInput!) {
       }
     }
     imageURL
+    latitude
+    longitude
   }
 }
 mutation UpdateTask($input: UpdateTaskInput!) {
@@ -31,6 +33,8 @@ mutation UpdateTask($input: UpdateTaskInput!) {
       }
     }
     imageURL
+    latitude
+    longitude
   }
 }
 mutation DeleteTask($input: DeleteTaskInput!) {
@@ -48,6 +52,8 @@ mutation DeleteTask($input: DeleteTaskInput!) {
       }
     }
     imageURL
+    latitude
+    longitude
   }
 }
 mutation CreateTeam($input: CreateTeamInput!) {
@@ -62,6 +68,8 @@ mutation CreateTeam($input: CreateTeamInput!) {
         assignedUser
         status
         imageURL
+        latitude
+        longitude
       }
       nextToken
     }
@@ -79,6 +87,8 @@ mutation UpdateTeam($input: UpdateTeamInput!) {
         assignedUser
         status
         imageURL
+        latitude
+        longitude
       }
       nextToken
     }
@@ -96,6 +106,8 @@ mutation DeleteTeam($input: DeleteTeamInput!) {
         assignedUser
         status
         imageURL
+        latitude
+        longitude
       }
       nextToken
     }

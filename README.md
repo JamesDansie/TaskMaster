@@ -39,3 +39,6 @@ Added teams to dynamoDB. Front page filters based off of the team in settings.
 
 2019/11/05
 Added Auth log in. Front page displays the user name, and changes on log out.
+
+2019/11/13
+A bunch happened in between here. Notifications are set up. Location data is stored in the task. Added the ability to share a picture with the App. Added picture storage in s3 that will show in the detail view.

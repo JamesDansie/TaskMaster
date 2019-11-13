@@ -26,6 +26,8 @@ public class Task {
     private String description;
     private String assignedUser;
     private String imageURL;
+    private String latitude;
+    private String longitude;
 
     @TypeConverters(StatusConverter.class)
     private String status;
@@ -51,6 +53,8 @@ public class Task {
         this.assignedUser = item.assignedUser();
         this.idDyno = item.id();
         this.imageURL = item.imageURL();
+        this.latitude = item.latitude();
+        this.longitude = item.longitude();
     }
 
     public Task(GetTeamQuery.Item item){
@@ -60,6 +64,8 @@ public class Task {
         this.assignedUser = item.assignedUser();
         this.idDyno = item.id();
         this.imageURL = item.imageURL();
+        this.latitude = item.latitude();
+        this.longitude = item.longitude();
     }
 
     public String getTitle() {
@@ -110,6 +116,22 @@ public class Task {
         this.status = status;
     }
 
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -119,6 +141,8 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", assignedUser='" + assignedUser + '\'' +
                 ", imageURL='" + imageURL + '\'' +
+                ", latitude='" + latitude + '\'' +
+                ", longitude='" + longitude + '\'' +
                 ", status='" + status + '\'' +
                 '}';
     }

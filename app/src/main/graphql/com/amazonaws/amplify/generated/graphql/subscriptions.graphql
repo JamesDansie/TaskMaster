@@ -14,6 +14,8 @@ subscription OnCreateTask {
       }
     }
     imageURL
+    latitude
+    longitude
   }
 }
 subscription OnUpdateTask {
@@ -31,6 +33,8 @@ subscription OnUpdateTask {
       }
     }
     imageURL
+    latitude
+    longitude
   }
 }
 subscription OnDeleteTask {
@@ -48,6 +52,8 @@ subscription OnDeleteTask {
       }
     }
     imageURL
+    latitude
+    longitude
   }
 }
 subscription OnCreateTeam {
@@ -62,6 +68,8 @@ subscription OnCreateTeam {
         assignedUser
         status
         imageURL
+        latitude
+        longitude
       }
       nextToken
     }
@@ -79,6 +87,8 @@ subscription OnUpdateTeam {
         assignedUser
         status
         imageURL
+        latitude
+        longitude
       }
       nextToken
     }
@@ -96,6 +106,8 @@ subscription OnDeleteTeam {
         assignedUser
         status
         imageURL
+        latitude
+        longitude
       }
       nextToken
     }
