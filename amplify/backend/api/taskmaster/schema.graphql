@@ -6,6 +6,8 @@ type Task @model {
   status: String
   team: Team @connection(name:"TeamTasks")
   imageURL: String
+  latitude: String
+  longitude: String
 }
 type Team @model {
   id: ID!

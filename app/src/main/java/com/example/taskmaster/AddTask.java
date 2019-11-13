@@ -100,6 +100,8 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
     private static final String TAG = "Dansie";
     private String imageURL;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private String latitude;
+    private String longitude;
 
 
     @Override
@@ -155,6 +157,7 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
             }
         }
 
+        //************************ Location Section ******************
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         fusedLocationProviderClient.getLastLocation()
                 .addOnFailureListener(this, new OnFailureListener() {
@@ -170,6 +173,8 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                         if (location != null) {
                             // Logic to handle location object
                             Log.i(TAG, "Location object is: " + location.toString());
+                            latitude = Double.toString(location.getLatitude());
+                            longitude = Double.toString(location.getLongitude());
                         }
                         Log.i(TAG, "Loc Obj is " +location);
                     }
@@ -177,13 +182,13 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                 });
         Log.i(TAG, fusedLocationProviderClient.toString());
 
-        // Build a connection to AWS
+        // ********* Build a connection to AWS *********
         awsAppSyncClient = AWSAppSyncClient.builder()
                 .context(getApplicationContext())
                 .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
-        //dynamoDB stuff to get a list of teams
+        //********* dynamoDB stuff to get a list of teams *********
         ListTeamsQuery query = ListTeamsQuery.builder().build();
         awsAppSyncClient.query(query)
                 .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
@@ -212,6 +217,8 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
             String username = prefs.getString("username", "Interchangable Cog");
             newTask.setAssignedUser(username);
             newTask.setImageURL(imageURL);
+            newTask.setLatitude(latitude);
+            newTask.setLongitude(longitude);
 
             // Saving the new task
             runAddTaskMutation(newTask);
@@ -268,6 +275,8 @@ public class AddTask extends AppCompatActivity implements AdapterView.OnItemSele
                         .assignedUser(newTask.getAssignedUser())
                         .taskTeamId(teamID)
                         .imageURL(newTask.getImageURL())
+                        .latitude(newTask.getLatitude())
+                        .longitude(newTask.getLongitude())
                         .build();
                 CreateTaskMutation mutation = CreateTaskMutation.builder().input(input).build();
                 awsAppSyncClient.mutate(mutation).enqueue(new GraphQLCall.Callback<CreateTaskMutation.Data>() {

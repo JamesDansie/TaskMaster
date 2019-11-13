@@ -12,7 +12,7 @@
         android:layout_height="132dp"
         android:layout_marginTop="100dp"
         android:text="Task Title"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+        android:textAppearance="@style/TextAppearance.AppCompat.Display3"
         app:layout_constraintStart_toStartOf="@+id/taskDescriptionDetailText"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -43,4 +43,22 @@
         app:layout_constraintEnd_toEndOf="@+id/taskDescriptionDetailText"
         app:layout_constraintTop_toTopOf="@+id/DetailTaskName"
         app:srcCompat="@mipmap/ic_launcher" />
+
+    <TextView
+        android:id="@+id/LatitudeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="No Latitude Recorded"
+        app:layout_constraintEnd_toEndOf="@+id/taskDescriptionDetailText"
+        app:layout_constraintTop_toBottomOf="@+id/taskDescriptionDetailText" />
+
+    <TextView
+        android:id="@+id/LongitudeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="No Longitude Recorded"
+        app:layout_constraintEnd_toEndOf="@+id/taskDescriptionDetailText"
+        app:layout_constraintTop_toBottomOf="@+id/LatitudeText" />
 </androidx.constraintlayout.widget.ConstraintLayout>

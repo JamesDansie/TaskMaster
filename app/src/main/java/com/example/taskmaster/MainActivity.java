@@ -290,6 +290,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         Log.i(TAG, "Main.TaskPassedInPotato "+task.toString());
         goToDetailIntent.putExtra("taskId", task.getIdDyno());
         goToDetailIntent.putExtra("imageURL", task.getImageURL());
+        goToDetailIntent.putExtra("latitude", task.getLatitude());
+        goToDetailIntent.putExtra("longitude", task.getLongitude());
 
         MainActivity.this.startActivity(goToDetailIntent);
     }
