@@ -110,7 +110,6 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         mAdapter = new TaskAdapter(this.tasks, this);
         recyclerView.setAdapter(mAdapter);
 
-        // Initialize PinpointManager
     }
 
     protected void setUserName(String name){
