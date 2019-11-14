@@ -28,6 +28,7 @@ import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.amazonaws.mobileconnectors.pinpoint.PinpointConfiguration;
 import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
+import com.amazonaws.mobileconnectors.pinpoint.analytics.AnalyticsEvent;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.exception.ApolloException;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -179,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         Button addTaskButton = findViewById(R.id.ButtonTaskAdd);
         addTaskButton.setOnClickListener((event) -> {
+            logAddTask();
             Intent goToAddTask = new Intent(MainActivity.this, AddTask.class);
             MainActivity.this.startActivity(goToAddTask);
         });
@@ -229,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
     @Override
     protected void onDestroy(){
         super.onDestroy();
+        Log.i(TAG, "Ahhh destruction!");
 
         pinpointManager.getSessionClient().stopSession();
         pinpointManager.getAnalyticsClient().submitEvents();
@@ -301,6 +304,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("latitude", task.getLatitude());
         goToDetailIntent.putExtra("longitude", task.getLongitude());
 
+        logDetailView(task);
+
         MainActivity.this.startActivity(goToDetailIntent);
     }
 
@@ -369,6 +374,29 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                     });
         }
         return pinpointManager;
+    }
+
+    public void logAddTask(){
+        final AnalyticsEvent addTaskEvent =
+                pinpointManager.getAnalyticsClient().createEvent("Add Task")
+                .withAttribute("User Name", username)
+                .withMetric("Click", (double) 1);
+        Log.i(TAG, "logged add task");
+
+        pinpointManager.getAnalyticsClient().recordEvent(addTaskEvent);
+        pinpointManager.getAnalyticsClient().submitEvents();
+    }
+
+    public void logDetailView(Task task){
+        final AnalyticsEvent detailEvent =
+                pinpointManager.getAnalyticsClient().createEvent("Detail view")
+                .withAttribute("Task Title", task.getTitle())
+                .withAttribute("Task Owner", task.getAssignedUser())
+                .withMetric("Click", (double)1);
+
+        Log.i(TAG, "logged detail view");
+        pinpointManager.getAnalyticsClient().recordEvent(detailEvent);
+        pinpointManager.getAnalyticsClient().submitEvents();
     }
 }
 //
