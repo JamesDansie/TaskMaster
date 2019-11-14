@@ -1,0 +1,21 @@
+{
+    "appName": "TaskMasterCccSG",
+    "roleName": "pinpointLambdaRole9f6537f7",
+    "cloudWatchPolicyName": "cloudWatchPolicy9f6537f7",
+    "pinpointPolicyName": "pinpointPolicy9f6537f7",
+    "authPolicyName": "pinpoint_amplify_9f6537f7",
+    "unauthPolicyName": "pinpoint_amplify_9f6537f7",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    },
+    "appId": "afcc21e687de40a88e5916d51e3cc413"
+}

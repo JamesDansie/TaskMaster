@@ -112,32 +112,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     }
 
-    protected void setUserName(String name){
-        Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
-            @Override
-            public void handleMessage(Message inputMessage){
-
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                SharedPreferences.Editor editor = prefs.edit();
-
-                editor.putString("username", name);
-                editor.apply();
-
-                TextView userTasks = findViewById(R.id.textViewUserTasksMain);
-                userTasks.setText(name +"'s tasks are;");
-            }
-        };
-        handlerForMainThread.obtainMessage().sendToTarget();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         // *********** PinPoint stuff *************
-        getPinpointManager(getApplicationContext());
-
+        final PinpointManager pinpointManager = getPinpointManager(getApplicationContext());
+        pinpointManager.getSessionClient().startSession();
 
         //***************** OkHttp To Heroku ***************
 //        OkHttpClient client = new OkHttpClient();
@@ -242,6 +224,32 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             Log.i(TAG,"Main.LogOutButton I've been clicked");
             setUserName("Interchangable Cog");
         });
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+
+        pinpointManager.getSessionClient().stopSession();
+        pinpointManager.getAnalyticsClient().submitEvents();
+    }
+
+    protected void setUserName(String name){
+        Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(Message inputMessage){
+
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                SharedPreferences.Editor editor = prefs.edit();
+
+                editor.putString("username", name);
+                editor.apply();
+
+                TextView userTasks = findViewById(R.id.textViewUserTasksMain);
+                userTasks.setText(name +"'s tasks are;");
+            }
+        };
+        handlerForMainThread.obtainMessage().sendToTarget();
     }
 
     public void queryTeamTasks() {
