@@ -28,6 +28,7 @@ import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers;
 import com.amazonaws.mobileconnectors.pinpoint.PinpointConfiguration;
 import com.amazonaws.mobileconnectors.pinpoint.PinpointManager;
+import com.amazonaws.mobileconnectors.pinpoint.analytics.AnalyticsEvent;
 import com.apollographql.apollo.GraphQLCall;
 import com.apollographql.apollo.exception.ApolloException;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -112,32 +113,14 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
     }
 
-    protected void setUserName(String name){
-        Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
-            @Override
-            public void handleMessage(Message inputMessage){
-
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                SharedPreferences.Editor editor = prefs.edit();
-
-                editor.putString("username", name);
-                editor.apply();
-
-                TextView userTasks = findViewById(R.id.textViewUserTasksMain);
-                userTasks.setText(name +"'s tasks are;");
-            }
-        };
-        handlerForMainThread.obtainMessage().sendToTarget();
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         // *********** PinPoint stuff *************
-        getPinpointManager(getApplicationContext());
-
+        final PinpointManager pinpointManager = getPinpointManager(getApplicationContext());
+        pinpointManager.getSessionClient().startSession();
 
         //***************** OkHttp To Heroku ***************
 //        OkHttpClient client = new OkHttpClient();
@@ -197,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
 
         Button addTaskButton = findViewById(R.id.ButtonTaskAdd);
         addTaskButton.setOnClickListener((event) -> {
+            logAddTask();
             Intent goToAddTask = new Intent(MainActivity.this, AddTask.class);
             MainActivity.this.startActivity(goToAddTask);
         });
@@ -242,6 +226,33 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
             Log.i(TAG,"Main.LogOutButton I've been clicked");
             setUserName("Interchangable Cog");
         });
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        Log.i(TAG, "Ahhh destruction!");
+
+        pinpointManager.getSessionClient().stopSession();
+        pinpointManager.getAnalyticsClient().submitEvents();
+    }
+
+    protected void setUserName(String name){
+        Handler handlerForMainThread = new Handler(Looper.getMainLooper()){
+            @Override
+            public void handleMessage(Message inputMessage){
+
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                SharedPreferences.Editor editor = prefs.edit();
+
+                editor.putString("username", name);
+                editor.apply();
+
+                TextView userTasks = findViewById(R.id.textViewUserTasksMain);
+                userTasks.setText(name +"'s tasks are;");
+            }
+        };
+        handlerForMainThread.obtainMessage().sendToTarget();
     }
 
     public void queryTeamTasks() {
@@ -292,6 +303,8 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
         goToDetailIntent.putExtra("imageURL", task.getImageURL());
         goToDetailIntent.putExtra("latitude", task.getLatitude());
         goToDetailIntent.putExtra("longitude", task.getLongitude());
+
+        logDetailView(task);
 
         MainActivity.this.startActivity(goToDetailIntent);
     }
@@ -361,6 +374,29 @@ public class MainActivity extends AppCompatActivity implements TaskAdapter.OnTas
                     });
         }
         return pinpointManager;
+    }
+
+    public void logAddTask(){
+        final AnalyticsEvent addTaskEvent =
+                pinpointManager.getAnalyticsClient().createEvent("Add Task")
+                .withAttribute("User Name", username)
+                .withMetric("Click", (double) 1);
+        Log.i(TAG, "logged add task");
+
+        pinpointManager.getAnalyticsClient().recordEvent(addTaskEvent);
+        pinpointManager.getAnalyticsClient().submitEvents();
+    }
+
+    public void logDetailView(Task task){
+        final AnalyticsEvent detailEvent =
+                pinpointManager.getAnalyticsClient().createEvent("Detail view")
+                .withAttribute("Task Title", task.getTitle())
+                .withAttribute("Task Owner", task.getAssignedUser())
+                .withMetric("Click", (double)1);
+
+        Log.i(TAG, "logged detail view");
+        pinpointManager.getAnalyticsClient().recordEvent(detailEvent);
+        pinpointManager.getAnalyticsClient().submitEvents();
     }
 }
 //
