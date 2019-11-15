@@ -45,3 +45,6 @@ A bunch happened in between here. Notifications are set up. Location data is sto
 
 2019/11/14
 Added analytics. Can log sessions, add task, and detail views. 
+
+2019/11/5
+Updated read me and made final apk
