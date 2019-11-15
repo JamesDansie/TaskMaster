@@ -11,6 +11,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import com.amazonaws.amplify.generated.graphql.GetTaskQuery;
 import com.amazonaws.amplify.generated.graphql.ListTasksQuery;
 import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient;
@@ -45,6 +46,12 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
                 .awsConfiguration(new AWSConfiguration(getApplicationContext()))
                 .build();
 
+        queryAllTasks();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
         recyclerView = (RecyclerView) findViewById(R.id.recyclerAllTasks);
         recyclerView.setHasFixedSize(true);
 
@@ -53,17 +60,15 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
 
         mAdapter = new TaskAdapter(this.tasks, this);
         recyclerView.setAdapter(mAdapter);
-
-        queryAllTasks();
     }
 
     private void queryAllTasks(){
         awsAppSyncClient.query(ListTasksQuery.builder().build())
-                .responseFetcher(AppSyncResponseFetchers.NETWORK_FIRST)
-                .enqueue(getAllTasksCallback);
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
+                .enqueue(listAllTasksCallback);
     }
 
-    public GraphQLCall.Callback<ListTasksQuery.Data> getAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
+    public GraphQLCall.Callback<ListTasksQuery.Data> listAllTasksCallback = new GraphQLCall.Callback<ListTasksQuery.Data>() {
         @Override
         public void onResponse(@Nonnull Response<ListTasksQuery.Data> response) {
 
@@ -72,12 +77,17 @@ public class AllTasks extends AppCompatActivity implements TaskAdapter.OnTaskInt
                     List<ListTasksQuery.Item> items = response.data().listTasks().items();
                     tasks.clear();
 
+//                    Log.i(TAG, "item size is: " + Integer.toString(items.size()));
                     for(ListTasksQuery.Item item : items){
                         tasks.add(new Task(item));
                     }
                     mAdapter.notifyDataSetChanged();
+//                    Log.i(TAG, "The task list is " + tasks.size() + " items long");
+
                 }
+
             };
+
             h.obtainMessage().sendToTarget();
         }
 

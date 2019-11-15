@@ -55,6 +55,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     // RecyclerView has a row (maybe previously used?) that needs to be updated for a particular location/index
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
+        Log.i(TAG, "Recycle view position " + position);
+        Log.i(TAG, "Recycle tasks size " + this.tasks.size());
         Task taskAtPosition = this.tasks.get(position);
         holder.task = taskAtPosition;
         holder.taskTitleView.setText(taskAtPosition.getTitle());
